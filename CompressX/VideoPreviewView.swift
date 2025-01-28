@@ -16,7 +16,6 @@ struct VideoView: View {
   @State var avPlayer: AVPlayer?
 
   let file: InputFile
-  let outputFormat: VideoFormat
   @Binding var startTimes: [URL: CMTime]
   @Binding var endTimes: [URL: CMTime]
   var onRemove: () -> Void
@@ -73,7 +72,6 @@ struct VideoPreviewView: View {
 
   let file: InputFile
   let size: CGFloat
-  let outputFormat: VideoFormat
   @Binding var startTimes: [URL: CMTime]
   @Binding var endTimes: [URL: CMTime]
   var onRemove: () -> Void
@@ -118,7 +116,6 @@ struct VideoPreviewView: View {
     .sheet(isPresented: $show) {
       VideoView(
         file: file,
-        outputFormat: outputFormat,
         startTimes: $startTimes,
         endTimes: $endTimes,
         onRemove: onRemove

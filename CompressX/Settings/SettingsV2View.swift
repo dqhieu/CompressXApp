@@ -15,6 +15,7 @@ enum Setting: String, CaseIterable{
   case appearance
   case monitoring
   case dropZone
+  case pdfCompression
   case license
   case credits
   case softwareUpdate
@@ -36,6 +37,8 @@ enum Setting: String, CaseIterable{
       return "Monitoring"
     case .dropZone:
       return "Drop Zone"
+    case .pdfCompression:
+      return "PDF Compression"
     case .license:
       return "License"
     case .credits:
@@ -61,6 +64,8 @@ enum Setting: String, CaseIterable{
       return "eyes"
     case .dropZone:
       return "doc.viewfinder"
+    case .pdfCompression:
+      return "doc.append"
     case .license:
       return "key"
     case .credits:
@@ -154,6 +159,9 @@ struct SettingsV2View: View {
             MonitoringSettingsView()
           case .dropZone:
             DropZoneSettingsV2View()
+          case .pdfCompression:
+            PDFCompressionSettingsView()
+              .environmentObject(installationManager)
           case .license:
             LicenseSettingsV2View()
           case .credits:
@@ -162,7 +170,6 @@ struct SettingsV2View: View {
             UpdateSettingsV2View(updater: updater)
           case .about:
             AboutSettingsView()
-              .environmentObject(installationManager)
           }
         }
         Spacer()

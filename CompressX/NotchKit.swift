@@ -162,7 +162,7 @@ struct NotchView: View {
           if !(isMinimized || notchStyle == .compact) {
             VStack {
               HStack {
-                if jobManager.currentJob?.isMKV ?? false {
+                if (jobManager.currentJob?.isMKV ?? false) || (jobManager.currentJob?.isPdf ?? false) {
                   ProgressView()
                     .progressViewStyle(.linear)
                     .preferredColorScheme(.dark)

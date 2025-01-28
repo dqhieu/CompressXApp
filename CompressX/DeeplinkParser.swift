@@ -21,7 +21,7 @@ class DeeplinkParser {
     if let components = URLComponents(url: url, resolvingAgainstBaseURL: true) {
       switch components.scheme?.lowercased() {
       case "file": // open with
-        let outputType: OutputType = {
+        let outputType: OutputType? = {
           let fileType = checkFileType(url: url)
           switch fileType {
           case .image(let imageType):
@@ -33,28 +33,35 @@ class DeeplinkParser {
             }
           case .gif:
             return .gifCompress(gifQuality: .high, dimension: .same)
-          default:
-            break
+          case .pdf:
+            return .pdfCompress(pdfQuality: .balance)
+          case .video:
+            return .video(
+              videoQuality: .high,
+              videoDimension: .same,
+              videoFormat: .same,
+              hasAudio: true,
+              removeAudio: false,
+              preserveTransparency: false,
+              startTime: nil,
+              endTime: nil
+            )
+          case .notSupported:
+            return nil
           }
-          return .video(
-            videoQuality: .high, 
-            videoDimension: .same,
-            videoFormat: .same,
-            hasAudio: true,
-            removeAudio: false,
-            preserveTransparency: false,
-            startTime: nil,
-            endTime: nil
-          )
         }()
-        return [Job(
-          inputFileURL: url,
-          outputType: outputType,
-          outputFolder: .same,
-          customOutputFolder: "",
-          outputFileNameFormat: outputFileNameFormat,
-          removeInputFile: removeFileAfterCompress
-        )]
+        if let outputType = outputType {
+          return [Job(
+            inputFileURL: url,
+            outputType: outputType,
+            outputFolder: .same,
+            customOutputFolder: "",
+            outputFileNameFormat: outputFileNameFormat,
+            removeInputFile: removeFileAfterCompress
+          )]
+        } else {
+          return []
+        }
       case "compressx": // deeplink
         // example deeplink: compressx://open?path=file:///Users/hieudinh/Desktop/acquired.mp4
         switch components.host {
@@ -75,8 +82,9 @@ class DeeplinkParser {
                   }
                   let fileURLs = flattenFolder(urls: [URL(string: String(newPath))!])
                   for fileURL in fileURLs {
-                    let job = createJob(fileURL: fileURL, components: components)
-                    jobs.append(job)
+                    if let job = createJob(fileURL: fileURL, components: components) {
+                      jobs.append(job)
+                    }
                   }
                 } else {
                   var newPath = String(path)
@@ -84,8 +92,9 @@ class DeeplinkParser {
                     newPath = "file://" + path
                   }
                   if let fileURL = URL(string: newPath) {
-                    let job = createJob(fileURL: fileURL, components: components)
-                    jobs.append(job)
+                    if let job = createJob(fileURL: fileURL, components: components) {
+                      jobs.append(job)
+                    }
                   }
                 }
               }
@@ -125,7 +134,7 @@ class DeeplinkParser {
     return []
   }
 
-  private func createJob(fileURL: URL, components: URLComponents) -> Job {
+  private func createJob(fileURL: URL, components: URLComponents) -> Job? {
     let videoQuality: VideoQuality = {
       if let qualityValue = components.queryItems?.first(where: { $0.name == "quality"} )?.value {
         return VideoQuality(rawValue: qualityValue.lowercased()) ?? .high
@@ -168,6 +177,12 @@ class DeeplinkParser {
       }
       return .high
     }()
+    let pdfQuality: PDFQuality = {
+      if let qualityValue = components.queryItems?.first(where: { $0.name == "pdfQuality"} )?.value ?? components.queryItems?.first(where: { $0.name == "quality"} )?.value {
+        return PDFQuality(rawValue: qualityValue.lowercased()) ?? .balance
+      }
+      return .high
+    }()
     let outputDirectory: String? = {
       if let value = components.queryItems?.first(where: { $0.name == "outputFolder"} )?.value {
         return value
@@ -197,7 +212,7 @@ class DeeplinkParser {
       }
       return outputFileNameFormat
     }()
-    let outputType: OutputType = {
+    let outputType: OutputType? = {
       let fileType = checkFileType(url: fileURL)
       switch fileType {
       case .image(let imageType):
@@ -209,46 +224,53 @@ class DeeplinkParser {
         }
       case .gif:
         return .gifCompress(gifQuality: gifQuality, dimension: .same)
-      default:
-        break
+      case .pdf:
+        return .pdfCompress(pdfQuality: pdfQuality)
+      case .video:
+        return .video(
+          videoQuality: videoQuality,
+          videoDimension: .same,
+          videoFormat: videoFormat,
+          hasAudio: true,
+          removeAudio: removeAudio,
+          preserveTransparency: false,
+          startTime: nil,
+          endTime: nil
+        )
+      case .notSupported:
+        return nil
       }
-      return .video(
-        videoQuality: videoQuality,
-        videoDimension: .same,
-        videoFormat: videoFormat,
-        hasAudio: true,
-        removeAudio: removeAudio,
-        preserveTransparency: false,
-        startTime: nil,
-        endTime: nil
-      )
     }()
-    if var outputDirectory = outputDirectory, !outputDirectory.isEmpty {
-      if !outputDirectory.hasPrefix("/") {
-        outputDirectory = "/" + outputDirectory
+    if let outputType = outputType {
+      if var outputDirectory = outputDirectory, !outputDirectory.isEmpty {
+        if !outputDirectory.hasPrefix("/") {
+          outputDirectory = "/" + outputDirectory
+        }
+        if !outputDirectory.hasPrefix(FileManager.default.homeDirectoryForCurrentUser.path) {
+          outputDirectory = FileManager.default.homeDirectoryForCurrentUser.path + outputDirectory
+        }
+        let job = Job(
+          inputFileURL: fileURL,
+          outputType: outputType,
+          outputFolder: .custom,
+          customOutputFolder: outputDirectory,
+          outputFileNameFormat: fileNameFormat,
+          removeInputFile: removeInputFile
+        )
+        return job
+      } else {
+        let job = Job(
+          inputFileURL: fileURL,
+          outputType: outputType,
+          outputFolder: .same,
+          customOutputFolder: "",
+          outputFileNameFormat: fileNameFormat,
+          removeInputFile: removeInputFile
+        )
+        return job
       }
-      if !outputDirectory.hasPrefix(FileManager.default.homeDirectoryForCurrentUser.path) {
-        outputDirectory = FileManager.default.homeDirectoryForCurrentUser.path + outputDirectory
-      }
-      let job = Job(
-        inputFileURL: fileURL,
-        outputType: outputType,
-        outputFolder: .custom,
-        customOutputFolder: outputDirectory,
-        outputFileNameFormat: fileNameFormat,
-        removeInputFile: removeInputFile
-      )
-      return job
     } else {
-      let job = Job(
-        inputFileURL: fileURL,
-        outputType: outputType,
-        outputFolder: .same,
-        customOutputFolder: "",
-        outputFileNameFormat: fileNameFormat,
-        removeInputFile: removeInputFile
-      )
-      return job
+      return nil
     }
   }
 }

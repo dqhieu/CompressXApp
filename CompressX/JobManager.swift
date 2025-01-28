@@ -119,6 +119,8 @@ class Job: Identifiable {
       }
     case .gif, .gifCompress:
       outputFileURL = outputFolderURL.appendingPathComponent(intputFileNameWithoutExtension + format + ".gif")
+    case .pdfCompress:
+      outputFileURL = outputFolderURL.appendingPathComponent(intputFileNameWithoutExtension + format + ".pdf")
     }
 
     targetOutputURL = outputFileURL
@@ -161,6 +163,15 @@ class Job: Identifiable {
     }
   }
 
+  var isPdf: Bool {
+    switch outputType {
+    case .pdfCompress:
+      return true
+    default:
+      return false
+    }
+  }
+
   var isMKV: Bool {
     return inputFileURL.pathExtension.lowercased() == "mkv" 
   }
@@ -184,6 +195,7 @@ enum OutputType {
   case image(imageQuality: ImageQuality, imageFormat: ImageFormat, imageDimension: ImageDimension)
   case gif(gifQuality: VideoQuality, fpsValue: Int, dimension: GifDimension)
   case gifCompress(gifQuality: VideoQuality, dimension: GifDimension)
+  case pdfCompress(pdfQuality: PDFQuality)
 
   var startTime: Double? {
     switch self {
@@ -205,14 +217,16 @@ enum OutputType {
 class JobManager: ObservableObject {
   
   @AppStorage("ffmpegPath") var ffmpegPath = ""
-  @AppStorage("pngquantPath") var pngquantPath = "/opt/homebrew/bin/pngquan"
-  @AppStorage("gifskiPath") var gifskiPath = "/opt/homebrew/bin/gifsk"
+  @AppStorage("pngquantPath") var pngquantPath = ""
+  @AppStorage("gifskiPath") var gifskiPath = ""
+  @AppStorage("ghostscriptPath") var ghostscriptPath = ""
   @AppStorage("customOutputFolder") var customOutputFolder = ""
   @AppStorage("outputFolder") var outputFolder: OutputFolder = .same
   @AppStorage("videoCompressed") var videoCompressed: Int = 0
   @AppStorage("imageCompressed") var imageCompressed: Int = 0
   @AppStorage("gifConverted") var gifConverted: Int = 0
   @AppStorage("gifCompressed") var gifCompressed: Int = 0
+  @AppStorage("pdfCompressed") var pdfCompressed: Int = 0
   @AppStorage("sizeReduced") var sizeReduced = 0
   @AppStorage("outputFileNameFormat") var outputFileNameFormat = ""
   @AppStorage("hardwareAccelerationEnabled") var hardwareAccelerationEnabled = false
@@ -289,14 +303,6 @@ class JobManager: ObservableObject {
                 "[a\(i)]",
               ])
             }
-//            arguments.append(contentsOf: [
-//              "-filter_complex",
-//              "[0:v]trim=start=\(start.seconds):end=\(end.seconds),setpts=PTS-STARTPTS[v];[0:a]atrim=start=\(start.seconds):end=\(end.seconds),asetpts=PTS-STARTPTS[a]",
-//              "-map",
-//              "[v]",
-//              "-map",
-//              "[a]",
-//            ])
           } else {
             arguments.append(contentsOf: [
               "-filter_complex",
@@ -334,7 +340,7 @@ class JobManager: ObservableObject {
           "-crf",
           videoQuality.crf
         ])
-        if removeAudio {
+        if removeAudio || !hasAudio {
           arguments.append("-an")
         } else if startTime != nil && endTime != nil {
 
@@ -343,7 +349,9 @@ class JobManager: ObservableObject {
             "-c:a",
             "copy",
             "-map",
-            "0"
+            "0:v",
+            "-map",
+            "0:a"
           ])
         }
         switch encodingCodec {
@@ -360,7 +368,6 @@ class JobManager: ObservableObject {
         }
       }
       arguments.append(job.outputFileURL.path(percentEncoded: false))
-      print("😂", arguments.joined(separator: " "))
       task.launchPath = ffmpegPath
       if !isValidFFmpegPath(ffmpegPath) {
         error = "FFmpeg setting is not correct"
@@ -471,6 +478,17 @@ class JobManager: ObservableObject {
       if !isValidGifskiPath(gifskiPath) {
         error = "gifski setting is incorrect"
       }
+    case .pdfCompress(let pdfQuality):
+      arguments.append(contentsOf: [
+        "-sDEVICE=pdfwrite",
+        "-dCompatibilityLevel=1.4",
+        "-dPDFSETTINGS=/\(pdfQuality.paramValue)",
+        "-dNOPAUSE",
+        "-dBATCH",
+        "-sOutputFile=\(job.outputFileURL.path(percentEncoded: false))",
+        job.inputFileURL.path(percentEncoded: false)
+      ])
+      task.launchPath = ghostscriptPath
     }
     task.arguments = arguments
     return (task, error)
@@ -493,9 +511,6 @@ class JobManager: ObservableObject {
     if case .video(let videoQuality, _, let videoFormat, _, _, let preserveTransparency, let startTime, let endTime) = job.outputType, preserveTransparency && videoFormat != .webm {
       return await transcodeVideo(sourceFileURL: job.inputFileURL, outputFileURL: job.outputFileURL, videoQuality: videoQuality, startTime: startTime, endTime: endTime)
     }
-//    if isPdfFile(url: job.inputFileURL) {
-//      return PDFCompressor().compress(job.inputFileURL, out: job.outputFileURL)
-//    }
     guard isFileSupported(url: job.inputFileURL) else {
       return "File format is not supported"
     }
@@ -515,6 +530,9 @@ class JobManager: ObservableObject {
     }
     if case .image(let imageQuality, let imageFormat, let imageDimension) = job.outputType, isSVGFile(url: job.inputFileURL), isTiffFile(url: job.inputFileURL), imageFormat == .same {
       return TIFFProcessor.compress(job: job, imageQuality: imageQuality, imageFormat: imageFormat, imageDimension: imageDimension)
+    }
+    if case .pdfCompress = job.outputType, ghostscriptPath.isEmpty {
+      return "Ghostscript is not installed"
     }
     let (process, pathError) = await createTask(job: job)
     currentProcess = process
@@ -677,11 +695,13 @@ class JobManager: ObservableObject {
       if index >= jobs.count { break }
     }
     await MainActor.run {
-      currentJob = nil
+      if !isTerminated {
+        currentJob = nil
+        currentIndex = nil
+      }
       isRunning = false
-      currentIndex = nil
       DockProgress.progressInstance = nil
-      let outputFileURLs = jobs.map { $0.inputFileURL }
+      let outputFileURLs = jobs.map { $0.outputFileURL }
       if copyCompressedFilesToClipboard, !outputFileURLs.isEmpty {
         NSPasteboard.general.writeObjects(outputFileURLs as [NSPasteboardWriting])
       }
@@ -829,6 +849,7 @@ class JobManager: ObservableObject {
     gifQuality: VideoQuality,
     gifDimension: GifDimension,
     videoFormat: VideoFormat,
+    pdfQuality: PDFQuality,
     hasAudio: Bool,
     removeAudio: Bool,
     fpsValue: Int,
@@ -872,6 +893,8 @@ class JobManager: ObservableObject {
             gifQuality: gifQuality,
             dimension: gifDimension
           )
+        case .pdf:
+          return .pdfCompress(pdfQuality: pdfQuality)
         case .notSupported:
           fatalError()
         }
@@ -950,10 +973,20 @@ class JobManager: ObservableObject {
           case .gif:
             gifConverted += 1
             TelemetryDeck.signal("convert.finish.gif", parameters: trackingData)
+          case .pdfCompress:
+            pdfCompressed += 1
+            TelemetryDeck.signal("compress.finish", parameters: trackingData)
+            if shouldSaveCompressionHistory {
+              compressionHistories.append(history)
+            }
           }
         }
       }
     }
+  }
+
+  func getJobIndex(_ job: Job) -> Int? {
+    return jobs.firstIndex(where: { $0.id == job.id })
   }
 }
 

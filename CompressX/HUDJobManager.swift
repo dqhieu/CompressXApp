@@ -170,7 +170,7 @@ class HUDJobManager: ObservableObject {
       currentJob = nil
       isRunning = false
       currentIndex = nil
-      let outputFileURLs = jobs.map { $0.inputFileURL }
+      let outputFileURLs = jobs.map { $0.outputFileURL }
       if copyCompressedFilesToClipboard, !outputFileURLs.isEmpty {
         NSPasteboard.general.writeObjects(outputFileURLs as [NSPasteboardWriting])
       }

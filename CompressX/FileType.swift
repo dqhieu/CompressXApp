@@ -11,6 +11,7 @@ enum FileType: Equatable {
   case image(ImageType)
   case gif
   case video
+  case pdf
   case notSupported
 
   var isImage: Bool {

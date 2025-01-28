@@ -64,6 +64,14 @@ struct LicenseSettingsV2View: View {
               case "expired":
                 Text("You're no longer able to receive new updates")
                 Spacer()
+                Button {
+                  let licenseKey = licenseManager.licenseKey
+                  let productID = licenseManager.productID
+                  let url = "https://compressx.app/license-renew?license-key=\(licenseKey)&product-id=\(productID)"
+                  NSWorkspace.shared.open(URL(string: url)!)
+                } label: {
+                  Text("Renew license")
+                }
               default:
                 EmptyView()
               }
@@ -89,6 +97,23 @@ struct LicenseSettingsV2View: View {
           .buttonStyle(.plain)
           .padding(.leading, 4)
           .foregroundStyle(.secondary)
+        }
+        if !licenseManager.customerEmail.isEmpty {
+          HStack(spacing: 0) {
+            Text("Email")
+            Spacer(minLength: 0)
+            Text(licenseManager.customerEmail)
+              .textSelection(.enabled)
+            Button {
+              NSPasteboard.general.clearContents()
+              NSPasteboard.general.setString(licenseManager.customerEmail, forType: .string)
+            } label: {
+              Image(systemName: "doc.on.doc")
+            }
+            .buttonStyle(.plain)
+            .padding(.leading, 4)
+            .foregroundStyle(.secondary)
+          }
         }
         HStack {
           Spacer()

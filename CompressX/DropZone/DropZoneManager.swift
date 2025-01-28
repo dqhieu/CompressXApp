@@ -334,6 +334,12 @@ class DropZoneManager: ObservableObject {
     let midY = (NSScreen.main?.frame.height ?? 0) / 2 + (NSScreen.main?.frame.origin.y ?? 0)
     offsetX = offsetXMax * ((mouseLocation.x - centerPoint.x) / centerPoint.x)
     offsetY = offsetYMax * ((mouseLocation.y - midY) / midY)
+//    if let window = notchWindow {
+//      var frame = notchFrame
+//      frame.origin.x += offsetX
+//      frame.origin.y += offsetY
+//      window.setFrameOrigin(frame.origin)
+//    }
 //    print("💛", mouseLocation, offsetX)
   }
 
@@ -356,6 +362,8 @@ class DropZoneManager: ObservableObject {
           case .gif:
             isFileTypeSupported = true
           case .video:
+            isFileTypeSupported = true
+          case .pdf:
             isFileTypeSupported = true
           case .notSupported:
             break

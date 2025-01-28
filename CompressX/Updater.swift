@@ -14,6 +14,7 @@ class Updater: NSObject, SPUUpdaterDelegate {
 
   var updater: SPUUpdater?
   var automaticallyChecksForUpdates: Bool = false
+  var didFindValidUpdate = false
 
   var dispatchWorkItem: DispatchWorkItem?
 
@@ -36,7 +37,20 @@ class Updater: NSObject, SPUUpdaterDelegate {
 
   func updater(_ updater: SPUUpdater, didFindValidUpdate item: SUAppcastItem) {
     DispatchQueue.main.async { [weak self] in
-      self?.updater?.checkForUpdates()
+      if self?.updater?.canCheckForUpdates ?? false {
+        self?.updater?.checkForUpdates()
+      } else {
+        self?.didFindValidUpdate = true
+      }
+    }
+  }
+
+  func updater(_ updater: SPUUpdater, didFinishUpdateCycleFor updateCheck: SPUUpdateCheck, error: (any Error)?) {
+    DispatchQueue.main.async { [weak self] in
+      if self?.didFindValidUpdate ?? false, self?.updater?.canCheckForUpdates ?? false {
+        self?.updater?.checkForUpdates()
+      }
+      self?.didFindValidUpdate = false
     }
   }
 

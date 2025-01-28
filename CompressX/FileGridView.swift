@@ -153,6 +153,9 @@ struct FileInfoOverlay: View {
     .onHover { isHover in
       isHovering = isHover
     }
+    .onDisappear {
+      wrapper?.playerView.player?.pause()
+    }
   }
 }
 
@@ -162,7 +165,6 @@ struct FileGridCellView: View {
 
   let file: InputFile
   let size: CGFloat
-  let outputFormat: VideoFormat
   @Binding var startTimes: [URL: CMTime]
   @Binding var endTimes: [URL: CMTime]
   var onRemove: () -> Void
@@ -182,11 +184,12 @@ struct FileGridCellView: View {
           VideoPreviewView(
             file: file,
             size: size,
-            outputFormat: outputFormat,
             startTimes: $startTimes,
             endTimes: $endTimes,
             onRemove: onRemove
           )
+        case .pdf:
+          PdfPreviewView(file: file, size: size, onRemove: onRemove)
         case .notSupported:
           Text("Unable to load file")
         }
@@ -209,7 +212,6 @@ struct FileGridView: View {
   @AppStorage("thumbnailPreviewLimit") var thumbnailPreviewLimit = 50
 
   let inputFiles: [InputFile]
-  let outputFormat: VideoFormat
   @Binding var startTimes: [URL: CMTime]
   @Binding var endTimes: [URL: CMTime]
   var onRemoveFile: (InputFile) -> Void
@@ -227,6 +229,8 @@ struct FileGridView: View {
         Text("You can change this settings anytime in Settings → File Management")
       }
       .frame(maxWidth: .infinity, maxHeight: .infinity)
+    } else if inputFiles.count == 1, let file = inputFiles.last, file.fileType == .video {
+      SingleVideoPlayerView(file: file, startTimes: $startTimes, endTimes: $endTimes)
     } else {
       GeometryReader { proxy in
         ScrollView(showsIndicators: false) {
@@ -239,7 +243,6 @@ struct FileGridView: View {
               FileGridCellView(
                 file: file,
                 size: getAvailableSize(size: proxy.size),
-                outputFormat: outputFormat,
                 startTimes: $startTimes,
                 endTimes: $endTimes,
                 onRemove: {

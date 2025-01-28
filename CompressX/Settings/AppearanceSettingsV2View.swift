@@ -50,7 +50,7 @@ struct AppearanceSettingsV2View: View {
         Toggle(isOn: $confettiEnabled) {
           VStack(alignment: .leading) {
             Text("Show confetti when compression finishes")
-            Text("Requires [Raycast](https://www.raycast.com/) to be installed.")
+            Text("Requires [Raycast](https://www.raycast.com/) to be installed. [Read the docs](https://docs.compressx.app/guides/how-to-show-confetti-when-compression-finishes) or [test confetti](raycast://confetti)")
               .foregroundStyle(.secondary)
               .font(.caption)
           }

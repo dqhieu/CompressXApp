@@ -10,6 +10,7 @@
 		470973852B71E43900BCFD05 /* Watcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 470973842B71E43900BCFD05 /* Watcher.swift */; };
 		4709738D2B71F43200BCFD05 /* LaunchAtLogin in Frameworks */ = {isa = PBXBuildFile; productRef = 4709738C2B71F43200BCFD05 /* LaunchAtLogin */; };
 		4709738F2B738E0100BCFD05 /* AVPlayerViewWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4709738E2B738E0100BCFD05 /* AVPlayerViewWrapper.swift */; };
+		470DE8BB2D3FCA5400A3CC4C /* OutputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 470DE8BA2D3FCA5400A3CC4C /* OutputView.swift */; };
 		470EA7332B614FCF00F103B9 /* DockProgress in Frameworks */ = {isa = PBXBuildFile; productRef = 470EA7322B614FCF00F103B9 /* DockProgress */; };
 		470F21102C39809C0068A297 /* SwiftDraw in Frameworks */ = {isa = PBXBuildFile; productRef = 470F210F2C39809C0068A297 /* SwiftDraw */; };
 		470F21122C3982C40068A297 /* SVGProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 470F21112C3982C40068A297 /* SVGProcessor.swift */; };
@@ -41,6 +42,7 @@
 		474EF1F22C6A5F21003A7602 /* MenuBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 474EF1F12C6A5F1F003A7602 /* MenuBarView.swift */; };
 		475307752C671F6F00C672A1 /* NoSleep.swift in Sources */ = {isa = PBXBuildFile; fileRef = 475307742C671F6F00C672A1 /* NoSleep.swift */; };
 		475A52CA2D1699AD00A18CF4 /* AppearanceSettingsV2View.swift in Sources */ = {isa = PBXBuildFile; fileRef = 475A52C92D1699A900A18CF4 /* AppearanceSettingsV2View.swift */; };
+		4767A4392D39FCA00015C413 /* PlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4767A4382D39FCA00015C413 /* PlayerView.swift */; };
 		4771A42B2B4D9B9600768E81 /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4771A42A2B4D9B9600768E81 /* Utils.swift */; };
 		47725F4B2BCCDCB400F6487E /* SDWebImageWebPCoder in Frameworks */ = {isa = PBXBuildFile; productRef = 47725F4A2BCCDCB400F6487E /* SDWebImageWebPCoder */; };
 		47725F4D2BCCE6E600F6487E /* WebPCoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47725F4C2BCCE6E600F6487E /* WebPCoder.swift */; };
@@ -73,7 +75,12 @@
 		47C2A2392D167E19005EB5FE /* GeneralSettingsV2View.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47C2A2382D167E15005EB5FE /* GeneralSettingsV2View.swift */; };
 		47C2A23B2D1681DE005EB5FE /* AdvancedSettingsV2View.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47C2A23A2D1681D9005EB5FE /* AdvancedSettingsV2View.swift */; };
 		47C2A23D2D16855A005EB5FE /* FileManagementSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47C2A23C2D168555005EB5FE /* FileManagementSettingsView.swift */; };
-		47F941A92B7A62D100270670 /* VideoSizeEstimator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47F941A82B7A62D100270670 /* VideoSizeEstimator.swift */; };
+		47DB9E272D2826FA00C11FA6 /* VideoOptionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47DB9E262D2826FA00C11FA6 /* VideoOptionsView.swift */; };
+		47DB9E2B2D28284D00C11FA6 /* ImageOptionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47DB9E2A2D28284A00C11FA6 /* ImageOptionsView.swift */; };
+		47DB9E2D2D2828A200C11FA6 /* GifOptionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47DB9E2C2D2828A000C11FA6 /* GifOptionsView.swift */; };
+		47DB9E2F2D282B4400C11FA6 /* PdfOptionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47DB9E2E2D282B4000C11FA6 /* PdfOptionsView.swift */; };
+		47DB9E312D28C45600C11FA6 /* PdfPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47DB9E302D28C45300C11FA6 /* PdfPreviewView.swift */; };
+		47DB9E332D28C9F300C11FA6 /* PDFCompressionSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47DB9E322D28C9EC00C11FA6 /* PDFCompressionSettings.swift */; };
 		47FA18DF2C5BBE1D008AB2C7 /* ImageType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47FA18DE2C5BBE1D008AB2C7 /* ImageType.swift */; };
 		47FA18E12C5BBE29008AB2C7 /* FileType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47FA18E02C5BBE29008AB2C7 /* FileType.swift */; };
 		47FA18E32C5BBE30008AB2C7 /* OutputFolder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47FA18E22C5BBE30008AB2C7 /* OutputFolder.swift */; };
@@ -105,6 +112,7 @@
 /* Begin PBXFileReference section */
 		470973842B71E43900BCFD05 /* Watcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Watcher.swift; sourceTree = "<group>"; };
 		4709738E2B738E0100BCFD05 /* AVPlayerViewWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AVPlayerViewWrapper.swift; sourceTree = "<group>"; };
+		470DE8BA2D3FCA5400A3CC4C /* OutputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OutputView.swift; sourceTree = "<group>"; };
 		470F21112C3982C40068A297 /* SVGProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SVGProcessor.swift; sourceTree = "<group>"; };
 		470F21132C3989530068A297 /* TIFFProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TIFFProcessor.swift; sourceTree = "<group>"; };
 		471C451E2B9CC5C7000DA937 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
@@ -133,6 +141,7 @@
 		474EF1F12C6A5F1F003A7602 /* MenuBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarView.swift; sourceTree = "<group>"; };
 		475307742C671F6F00C672A1 /* NoSleep.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoSleep.swift; sourceTree = "<group>"; };
 		475A52C92D1699A900A18CF4 /* AppearanceSettingsV2View.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppearanceSettingsV2View.swift; sourceTree = "<group>"; };
+		4767A4382D39FCA00015C413 /* PlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerView.swift; sourceTree = "<group>"; };
 		4771A42A2B4D9B9600768E81 /* Utils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utils.swift; sourceTree = "<group>"; };
 		47725F4C2BCCE6E600F6487E /* WebPCoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebPCoder.swift; sourceTree = "<group>"; };
 		477CACBB2B0904EF00B335E5 /* CompressX.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CompressX.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -163,7 +172,12 @@
 		47C2A2382D167E15005EB5FE /* GeneralSettingsV2View.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneralSettingsV2View.swift; sourceTree = "<group>"; };
 		47C2A23A2D1681D9005EB5FE /* AdvancedSettingsV2View.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvancedSettingsV2View.swift; sourceTree = "<group>"; };
 		47C2A23C2D168555005EB5FE /* FileManagementSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileManagementSettingsView.swift; sourceTree = "<group>"; };
-		47F941A82B7A62D100270670 /* VideoSizeEstimator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoSizeEstimator.swift; sourceTree = "<group>"; };
+		47DB9E262D2826FA00C11FA6 /* VideoOptionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoOptionsView.swift; sourceTree = "<group>"; };
+		47DB9E2A2D28284A00C11FA6 /* ImageOptionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageOptionsView.swift; sourceTree = "<group>"; };
+		47DB9E2C2D2828A000C11FA6 /* GifOptionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GifOptionsView.swift; sourceTree = "<group>"; };
+		47DB9E2E2D282B4000C11FA6 /* PdfOptionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PdfOptionsView.swift; sourceTree = "<group>"; };
+		47DB9E302D28C45300C11FA6 /* PdfPreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PdfPreviewView.swift; sourceTree = "<group>"; };
+		47DB9E322D28C9EC00C11FA6 /* PDFCompressionSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFCompressionSettings.swift; sourceTree = "<group>"; };
 		47FA18DE2C5BBE1D008AB2C7 /* ImageType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageType.swift; sourceTree = "<group>"; };
 		47FA18E02C5BBE29008AB2C7 /* FileType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileType.swift; sourceTree = "<group>"; };
 		47FA18E22C5BBE30008AB2C7 /* OutputFolder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OutputFolder.swift; sourceTree = "<group>"; };
@@ -248,17 +262,18 @@
 		474F95002C3182E600B4F8F6 /* Settings */ = {
 			isa = PBXGroup;
 			children = (
-				47A2BADD2D166E2F00BECD54 /* SettingsV2View.swift */,
-				478FCFA92D1709BA004AE78A /* DropZoneSettingsV2View.swift */,
-				478FCFA72D1708FF004AE78A /* MonitoringSettingsView.swift */,
 				47A90D572D170B4D00DB5262 /* AboutSettingsView.swift */,
-				47A90D592D170EB700DB5262 /* CreditsSettingsView.swift */,
-				47C2A2382D167E15005EB5FE /* GeneralSettingsV2View.swift */,
-				47A90D5B2D171D5600DB5262 /* UpdateSettingsV2View.swift */,
 				47C2A23A2D1681D9005EB5FE /* AdvancedSettingsV2View.swift */,
-				47A90D5F2D1728F100DB5262 /* LicenseSettingsV2View.swift */,
-				47C2A23C2D168555005EB5FE /* FileManagementSettingsView.swift */,
 				475A52C92D1699A900A18CF4 /* AppearanceSettingsV2View.swift */,
+				47A90D592D170EB700DB5262 /* CreditsSettingsView.swift */,
+				478FCFA92D1709BA004AE78A /* DropZoneSettingsV2View.swift */,
+				47C2A23C2D168555005EB5FE /* FileManagementSettingsView.swift */,
+				47C2A2382D167E15005EB5FE /* GeneralSettingsV2View.swift */,
+				47A90D5F2D1728F100DB5262 /* LicenseSettingsV2View.swift */,
+				478FCFA72D1708FF004AE78A /* MonitoringSettingsView.swift */,
+				47DB9E322D28C9EC00C11FA6 /* PDFCompressionSettings.swift */,
+				47A2BADD2D166E2F00BECD54 /* SettingsV2View.swift */,
+				47A90D5B2D171D5600DB5262 /* UpdateSettingsV2View.swift */,
 				47C2A2362D167B86005EB5FE /* WindowConfigurator.swift */,
 			);
 			path = Settings;
@@ -290,13 +305,20 @@
 				472F94C72C8854760092B4FF /* DropZone */,
 				474EF1F12C6A5F1F003A7602 /* MenuBarView.swift */,
 				47974E192CBFF5EE00EE6376 /* FileGridView.swift */,
+				4767A4382D39FCA00015C413 /* PlayerView.swift */,
 				47A116812CCD406E005B500E /* InputFile.swift */,
 				474DA44D2CC92C4400344130 /* ImagePreviewView.swift */,
 				474DA4EE2CC9349B00344130 /* GifPreviewView.swift */,
 				474DA4F02CC93D0300344130 /* VideoPreviewView.swift */,
+				47DB9E302D28C45300C11FA6 /* PdfPreviewView.swift */,
 				47FDC8322CA9195800922EE0 /* KeyboardShortctuts.swift */,
 				479916482BB5B14200A48611 /* CompressHistoryView.swift */,
 				477CACCD2B0CFFD100B335E5 /* CompressView.swift */,
+				470DE8BA2D3FCA5400A3CC4C /* OutputView.swift */,
+				47DB9E262D2826FA00C11FA6 /* VideoOptionsView.swift */,
+				47DB9E2A2D28284A00C11FA6 /* ImageOptionsView.swift */,
+				47DB9E2C2D2828A000C11FA6 /* GifOptionsView.swift */,
+				47DB9E2E2D282B4000C11FA6 /* PdfOptionsView.swift */,
 				478EF6702B908DF100FFFD8B /* DeeplinkParser.swift */,
 				47FA18E02C5BBE29008AB2C7 /* FileType.swift */,
 				475307742C671F6F00C672A1 /* NoSleep.swift */,
@@ -321,7 +343,6 @@
 				47FA18EA2C5BBE53008AB2C7 /* VideoDimension.swift */,
 				47FA18E82C5BBE4F008AB2C7 /* VideoFormat.swift */,
 				47FA18E62C5BBE47008AB2C7 /* VideoQuality.swift */,
-				47F941A82B7A62D100270670 /* VideoSizeEstimator.swift */,
 				470973842B71E43900BCFD05 /* Watcher.swift */,
 				47725F4C2BCCE6E600F6487E /* WebPCoder.swift */,
 				47974E122CBF7B2600EE6376 /* PDFCompressor.swift */,
@@ -449,6 +470,7 @@
 				47FA18EF2C5BBE5E008AB2C7 /* GifDimension.swift in Sources */,
 				474EF1F22C6A5F21003A7602 /* MenuBarView.swift in Sources */,
 				474DA4F12CC93D0500344130 /* VideoPreviewView.swift in Sources */,
+				47DB9E332D28C9F300C11FA6 /* PDFCompressionSettings.swift in Sources */,
 				474DA44E2CC92C4700344130 /* ImagePreviewView.swift in Sources */,
 				4709738F2B738E0100BCFD05 /* AVPlayerViewWrapper.swift in Sources */,
 				47FA603A2BBDAC120070F274 /* GIFImage.swift in Sources */,
@@ -456,7 +478,6 @@
 				47FA18F32C5BBE68008AB2C7 /* InputFileRow.swift in Sources */,
 				47FA18ED2C5BBE59008AB2C7 /* ImageDimension.swift in Sources */,
 				47484B2C2B49A8700089AEFA /* LicenseManager.swift in Sources */,
-				47F941A92B7A62D100270670 /* VideoSizeEstimator.swift in Sources */,
 				47A90D5A2D170EBB00DB5262 /* CreditsSettingsView.swift in Sources */,
 				478FCFA82D170903004AE78A /* MonitoringSettingsView.swift in Sources */,
 				47FA18DF2C5BBE1D008AB2C7 /* ImageType.swift in Sources */,
@@ -473,10 +494,12 @@
 				47FA18E52C5BBE3D008AB2C7 /* ImageQuality.swift in Sources */,
 				472F94C92C8854850092B4FF /* DropZoneView.swift in Sources */,
 				475A52CA2D1699AD00A18CF4 /* AppearanceSettingsV2View.swift in Sources */,
+				47DB9E272D2826FA00C11FA6 /* VideoOptionsView.swift in Sources */,
 				4771A42B2B4D9B9600768E81 /* Utils.swift in Sources */,
 				470F21142C3989530068A297 /* TIFFProcessor.swift in Sources */,
 				47FA18E92C5BBE4F008AB2C7 /* VideoFormat.swift in Sources */,
 				47C2A23B2D1681DE005EB5FE /* AdvancedSettingsV2View.swift in Sources */,
+				4767A4392D39FCA00015C413 /* PlayerView.swift in Sources */,
 				478EF6712B908DF100FFFD8B /* DeeplinkParser.swift in Sources */,
 				47FA18E72C5BBE47008AB2C7 /* VideoQuality.swift in Sources */,
 				47C2A2372D167B8C005EB5FE /* WindowConfigurator.swift in Sources */,
@@ -485,19 +508,24 @@
 				47FA18F12C5BBE62008AB2C7 /* ImageFormat.swift in Sources */,
 				4782E9F12B6E17460008D17E /* ActivateLicenseView.swift in Sources */,
 				47884EF52C19CB2F00872BC6 /* NiceButtonStyle.swift in Sources */,
+				47DB9E312D28C45600C11FA6 /* PdfPreviewView.swift in Sources */,
+				47DB9E2B2D28284D00C11FA6 /* ImageOptionsView.swift in Sources */,
 				478FCFAA2D1709BF004AE78A /* DropZoneSettingsV2View.swift in Sources */,
 				477CACBF2B0904EF00B335E5 /* CompressXApp.swift in Sources */,
 				47FA18E32C5BBE30008AB2C7 /* OutputFolder.swift in Sources */,
 				475307752C671F6F00C672A1 /* NoSleep.swift in Sources */,
 				473804402C625A5600426C99 /* OnboardingView.swift in Sources */,
+				47DB9E2D2D2828A200C11FA6 /* GifOptionsView.swift in Sources */,
 				47FA18E12C5BBE29008AB2C7 /* FileType.swift in Sources */,
 				47C2A2392D167E19005EB5FE /* GeneralSettingsV2View.swift in Sources */,
 				47725F4D2BCCE6E600F6487E /* WebPCoder.swift in Sources */,
 				472951572B91CF56006A8274 /* HUDJobManager.swift in Sources */,
 				473804522C625CA700426C99 /* InstallationView.swift in Sources */,
 				47974E1A2CBFF5F500EE6376 /* FileGridView.swift in Sources */,
+				470DE8BB2D3FCA5400A3CC4C /* OutputView.swift in Sources */,
 				472F94CB2C8854DB0092B4FF /* DropZoneManager.swift in Sources */,
 				471EC8C82C775C7E00A77B6C /* UpdateDependenciesView.swift in Sources */,
+				47DB9E2F2D282B4400C11FA6 /* PdfOptionsView.swift in Sources */,
 				4782E8C02B20AACF00482D73 /* OpenWithHandler.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -633,7 +661,7 @@
 				CODE_SIGN_ENTITLEMENTS = CompressX/CompressX.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 133;
+				CURRENT_PROJECT_VERSION = 144;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"CompressX/Preview Content\"";
 				DEVELOPMENT_TEAM = BH46VD9229;
@@ -649,7 +677,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 1.17;
+				MARKETING_VERSION = 1.18;
 				PRODUCT_BUNDLE_IDENTIFIER = com.hieudinh.CompressX;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -665,7 +693,7 @@
 				CODE_SIGN_ENTITLEMENTS = CompressX/CompressX.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 133;
+				CURRENT_PROJECT_VERSION = 144;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"CompressX/Preview Content\"";
 				DEVELOPMENT_TEAM = BH46VD9229;
@@ -681,7 +709,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 1.17;
+				MARKETING_VERSION = 1.18;
 				PRODUCT_BUNDLE_IDENTIFIER = com.hieudinh.CompressX;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;

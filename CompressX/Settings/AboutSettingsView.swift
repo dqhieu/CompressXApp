@@ -9,8 +9,6 @@ import SwiftUI
 
 struct AboutSettingsView: View {
 
-  @EnvironmentObject var installationManager: InstallationManager
-
   var body: some View {
     Form {
       HStack {

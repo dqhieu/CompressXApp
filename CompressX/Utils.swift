@@ -11,11 +11,15 @@ import AVFoundation
 import AppKit
 
 let videoSupportedTypes = [UTType.mpeg4Movie, .movie, .quickTimeMovie, .avi, .mpeg, .mpeg2Video, .video, UTType("org.matroska.mkv")].compactMap { $0 }
-let imageSupportedTypes = [UTType.image, .bmp, .jpeg] // .pdf
+let imageSupportedTypes = [UTType.image, .bmp, .jpeg]
+let pdfSupportedTypes = [UTType.pdf, .epub]
 let extraVideoSupportedTypes = ["mkv"]
 let notSupportedTypes: [String] = []
 
 func checkFileType(url: URL) -> FileType {
+  if isPDFFile(url: url) {
+    return .pdf
+  }
   if isGifFile(url: url) {
     return .gif
   }
@@ -52,7 +56,11 @@ fileprivate func isImageFile(url: URL) -> Bool {
   return false
 }
 
-fileprivate func isGifFile(url: URL) -> Bool {
+func isPDFFile(url: URL) -> Bool {
+  return url.pathExtension.lowercased() == "pdf" || url.pathExtension.lowercased() == "epub"
+}
+
+func isGifFile(url: URL) -> Bool {
   return url.pathExtension.lowercased() == "gif"
 }
 

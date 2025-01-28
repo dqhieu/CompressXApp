@@ -35,6 +35,7 @@ struct CompressView: View {
   @AppStorage("imageDimension") var imageDimension: ImageDimension = .same
   @AppStorage("videoDimension") var videoDimension: VideoDimension = .same
   @AppStorage("removeAudio") var removeAudio = false
+  @AppStorage("pdfQuality") var pdfQuality: PDFQuality = .balance
   @ObservedObject var jobManager = JobManager.shared
 
   @State private var lastWindowRect: NSRect?
@@ -55,6 +56,7 @@ struct CompressView: View {
   @State private var hasImageInput = false
   @State private var hasVideoInput = false
   @State private var hasGifInput = false
+  @State private var hasPDFInput = false
   @State private var fpsValue: Double = 30
   @State private var shouldShowProductHuntLink = false
   @State private var isHovering = false
@@ -159,7 +161,6 @@ struct CompressView: View {
             if !inputFiles.isEmpty {
               FileGridView(
                 inputFiles: inputFiles,
-                outputFormat: outputFormat,
                 startTimes: $startTimes,
                 endTimes: $endTimes,
                 onRemoveFile: { file in
@@ -271,135 +272,23 @@ struct CompressView: View {
             }
             .disabled(jobManager.isRunning)
             if hasVideoInput {
-              Section {
-                if outputFormat != .gif {
-                  Picker(selection: $videoQuality) {
-                    ForEach(videoQualities, id: \.self) { quality in
-                      Text(quality.displayText).tag(quality.rawValue)
-                    }
-                  } label: {
-                    Text("Video quality")
-                  }
-                  .pickerStyle(.menu)
-                  Picker(selection: $videoDimension) {
-                    ForEach(VideoDimension.allCases, id: \.self) { dimension in
-                      Text(dimension.displayText).tag(dimension.rawValue)
-                    }
-                  } label: {
-                    Text("Video resolution")
-                  }
-                  .pickerStyle(.menu)
-                }
-                Picker(selection: $outputFormat) {
-                  ForEach(VideoFormat.allCases, id: \.self) { format in
-                    Text(format.displayText).tag(format.rawValue)
-                  }
-                } label: {
-                  Text("Video format")
-                }
-                .pickerStyle(.menu)
-                .disabled(isInputWebM)
-                .onChange(of: outputFormat, perform: { newValue in
-                  if newValue == .webm {
-                    shouldPreserveTransparency = true
-                  }
-                })
-                if outputFormat == .gif {
-                  VStack(alignment: .leading) {
-                    HStack {
-                      Text("FPS")
-                      Text("\(Int(fpsValue))")
-                      Spacer()
-                    }
-                    Slider(value: $fpsValue, in: 10...50, step: 1)
-                      .labelsHidden()
-                  }
-                  Picker(selection: $videoGifQuality) {
-                    ForEach(gifQualities, id: \.self) { quality in
-                      Text(quality.displayText).tag(quality.rawValue)
-                    }
-                  } label: {
-                    Text("Gif quality")
-                  }
-                  .pickerStyle(.menu)
-                  Picker(selection: $videoGifDimension) {
-                    ForEach(GifDimension.allCases, id: \.self) { dimension in
-                      Text(dimension.displayText).tag(dimension.rawValue)
-                    }
-                  } label: {
-                    Text("Gif dimension")
-                  }
-                  .pickerStyle(.menu)
-                }
-                if showPreserveTransparency {
-                  Toggle("Preserve transparency", isOn: $shouldPreserveTransparency)
-                    .toggleStyle(.switch)
-                    .onChange(of: shouldPreserveTransparency, perform: { newValue in
-                      if newValue == true {
-                        resetOptionForTransparencyIfNeeded()
-                      }
-                    })
-                    .disabled(outputFormat == .webm)
-                }
-                if hasAudio && outputFormat != .gif {
-                  Toggle("Remove audio", isOn: $removeAudio)
-                    .toggleStyle(.switch)
-                    .disabled(shouldPreserveTransparency)
-                }
-              }
-              .disabled(jobManager.isRunning)
+              VideoOptionsView(
+                showPreserveTransparency: $showPreserveTransparency,
+                shouldPreserveTransparency: $shouldPreserveTransparency,
+                isInputWebM: $isInputWebM,
+                fpsValue: $fpsValue,
+                hasAudio: $hasAudio
+              )
             }
             if hasImageInput {
-              Section {
-                Picker(selection: $imageQuality) {
-                  ForEach(ImageQuality.allCases, id: \.self) { quality in
-                    Text(quality.displayText).tag(quality.rawValue)
-                  }
-                } label: {
-                  Text("Image quality")
-                }
-                .pickerStyle(.menu)
-                Picker(selection: $outputImageFormat) {
-                  ForEach(ImageFormat.allCases, id: \.self) { format in
-                    Text(format.displayText).tag(format.rawValue)
-                  }
-                } label: {
-                  Text("Image format")
-                }
-                .pickerStyle(.menu)
-                Picker(selection: $imageDimension) {
-                  ForEach(ImageDimension.allCases, id: \.self) { dimension in
-                    Text(dimension.displayText).tag(dimension.rawValue)
-                  }
-                } label: {
-                  Text("Image size")
-                }
-                .pickerStyle(.menu)
-              }
-              .disabled(jobManager.isRunning)
+              ImageOptionsView()
             }
             if hasGifInput {
-              Section {
-                Picker(selection: $gifQuality) {
-                  ForEach(gifQualities, id: \.self) { quality in
-                    Text(quality.displayText).tag(quality.rawValue)
-                  }
-                } label: {
-                  Text("Gif quality")
-                }
-                .pickerStyle(.menu)
-                Picker(selection: $gifDimension) {
-                  ForEach(GifDimension.allCases, id: \.self) { dimension in
-                    Text(dimension.displayText).tag(dimension.rawValue)
-                  }
-                } label: {
-                  Text("Gif dimension")
-                }
-                .pickerStyle(.menu)
-              }
-              .disabled(jobManager.isRunning)
+              GifOptionsView()
             }
-
+            if hasPDFInput {
+              PdfOptionsView()
+            }
             Section {
               if jobManager.isRunning, let job = jobManager.currentJob {
                 VStack(alignment: .leading, spacing: 4) {
@@ -432,7 +321,7 @@ struct CompressView: View {
                         .progressViewStyle(.linear)
                       }
 
-                    case .image:
+                    case .image, .pdfCompress:
                       if jobManager.jobs.count > 1 {
                         ProgressView(value: Double(jobManager.currentIndex ?? 0) - 1, total: max(Double(jobManager.currentIndex ?? 0), Double(jobManager.jobs.count))) {
                           HStack {
@@ -513,91 +402,37 @@ struct CompressView: View {
                 .keyboardShortcut(.defaultAction)
               }
             }
-            if !jobManager.isRunning, !jobManager.jobs.isEmpty, FileManager.default.fileExists(atPath: jobManager.jobs.first?.outputFileURL.path(percentEncoded: false) ?? "") {
-              Section {
-                HStack {
-                  if jobManager.jobs.count > 1 {
-                    Image(systemName: "checkmark.seal.fill")
-                      .foregroundStyle(.green)
-                    Text("Output files (\(jobManager.jobs.count))")
-                  } else {
-                    let reducedSize = (jobManager.jobs.first?.inputFileSize ?? 0) - (jobManager.jobs.first?.outputFileSize ?? 0)
-                    if reducedSize > 0 {
-                      Image(systemName: "checkmark.seal.fill")
-                        .foregroundStyle(.green)
-                    } else if outputFormat != .gif {
-                      Image(systemName: "exclamationmark.triangle.fill")
-                        .foregroundStyle(.orange)
-                    }
-                    Text("Output file")
-                  }
-                  Spacer()
-                  Button {
-                    NSWorkspace.shared.activateFileViewerSelecting(jobManager.jobs.map { $0.outputFileURL} )
-                  } label: {
-                    Text("Open in Finder")
-                  }
-                }
-                ScrollView {
-                  LazyVStack {
-                    ForEach(jobManager.jobs) { job in
-                      Button {
-                        NSWorkspace.shared.activateFileViewerSelecting([job.outputFileURL])
-                      } label: {
-                        VStack(alignment: .leading, spacing: 8) {
-                          HStack(alignment: .top) {
-                            Text(job.outputFileURL.lastPathComponent)
-                            Spacer()
-                            Text(fileSizeString(from: job.outputFileSize ?? 0))
-                              .foregroundStyle(.secondary)
-                          }
-                          if jobManager.jobs.count > 1 {
-                            HStack(alignment: .top) {
-                              let reducedSize = (job.inputFileSize ?? 0) - (job.outputFileSize ?? 0)
-                              if reducedSize > 0 {
-                                Image(systemName: "arrow.down.circle.fill")
-                                  .foregroundStyle(.green)
-                              } else if outputFormat != .gif {
-                                Image(systemName: "exclamationmark.triangle.fill")
-                                  .foregroundStyle(.orange)
-                              }
-                              Text(fileSizeString(from: reducedSize))
-                              Spacer()
-                              Image(systemName: "arrow.right")
-                                .foregroundStyle(.secondary)
-                            }
-                          }
-                        }
-                        .background(Color.white.opacity(0.001))
-                      }
-                      .buttonStyle(.plain)
-                      if job.id.uuidString != jobManager.jobs.last?.id.uuidString {
-                        Divider()
-                      }
-                    }
-                  }
-                }
-                .frame(maxHeight: 200)
-                if let reducedSizeString = reducedSizeString {
-                  HStack {
-                    Text(jobManager.jobs.count == 1 ? "Size reduced" : "Total size reduced")
-                    Spacer()
-                    Text(reducedSizeString)
-                  }
-                }
-                if let timeTaken = timeTaken {
-                  HStack {
-                    Text("Time taken")
-                    Spacer()
-                    Text(timeTaken)
-                  }
-                }
+            if jobManager.jobs.contains(where: { FileManager.default.fileExists(atPath: $0.outputFileURL.path(percentEncoded: false)) }) {
+              if jobManager.jobs.count == 1, !jobManager.isRunning {
+                OutputView(
+                  reducedSizeString: reducedSizeString,
+                  timeTaken: timeTaken
+                )
+              } else if (jobManager.isRunning && (jobManager.currentIndex ?? 0) > 1) || !jobManager.isRunning {
+                OutputView(
+                  reducedSizeString: reducedSizeString,
+                  timeTaken: timeTaken
+                )
               }
             }
             if let message = errorMessage {
               Section {
                 Text("\(Image(systemName: "xmark.diamond.fill")) \(message)")
                   .foregroundStyle(.red)
+                if message.lowercased().contains("bad cpu type in executable") {
+                  Button {
+                    NSWorkspace.shared.open(URL(string: "https://docs.compressx.app/guides/how-to-resolve-error-bad-cpu-type-in-executable-on-macos")!)
+                  } label: {
+                    Text("Open documentation")
+                  }
+                }
+                if message.lowercased().contains("ghostscript is not installed") {
+                  Button {
+                    NSWorkspace.shared.open(URL(string: "https://docs.compressx.app/guides/how-to-setup-pdf-compression")!)
+                  } label: {
+                    Text("Setup PDF compression")
+                  }
+                }
               }
             }
             if shouldShowProductHuntLink,
@@ -676,7 +511,7 @@ struct CompressView: View {
     panel.canChooseDirectories = true
     panel.canChooseFiles = true
     panel.showsHiddenFiles = true
-    panel.allowedContentTypes = videoSupportedTypes + imageSupportedTypes
+    panel.allowedContentTypes = videoSupportedTypes + imageSupportedTypes + pdfSupportedTypes
     let response = panel.runModal()
     if response == .OK {
       setSourceFile(urls: panel.urls)
@@ -702,6 +537,7 @@ struct CompressView: View {
     hasImageInput = false
     hasVideoInput = false
     hasGifInput = false
+    hasPDFInput = false
 
     for url in supportedURLs {
       let fileType = checkFileType(url: url)
@@ -712,6 +548,8 @@ struct CompressView: View {
         hasGifInput = true
       case .video:
         hasVideoInput = true
+      case .pdf:
+        hasPDFInput = true
       case .notSupported:
         break
       }
@@ -838,6 +676,8 @@ struct CompressView: View {
         self.videoGifQuality = gifQuality
         self.videoGifDimension = dimension
         self.fpsValue = Double(fpsValue)
+      case .pdfCompress:
+        break
       }
     }
     if !notifyWhenFinish {
@@ -870,6 +710,7 @@ struct CompressView: View {
       gifQuality: gifQuality,
       gifDimension: gifDimension,
       videoFormat: outputFormat,
+      pdfQuality: pdfQuality,
       hasAudio: hasAudio,
       removeAudio: removeAudio,
       fpsValue: Int(fpsValue),
@@ -979,6 +820,7 @@ struct CompressView: View {
         gifQuality: gifQuality,
         gifDimension: gifDimension,
         videoFormat: outputFormat,
+        pdfQuality: pdfQuality,
         hasAudio: hasAudio,
         removeAudio: removeAudio,
         fpsValue: Int(fpsValue),
