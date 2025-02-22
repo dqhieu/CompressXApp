@@ -25,7 +25,7 @@ struct StartView: View {
         }
 
         Text("Welcome to")
-        Text("CompressX")
+        Text("Compresto")
           .font(.largeTitle)
           .fontWeight(.bold)
           .foregroundStyle(
@@ -35,7 +35,7 @@ struct StartView: View {
               endPoint: .bottom
             )
           )
-        Text("The ultimate offline media compression tool")
+        Text("Compress files effortlessly")
           .padding(.top, 2)
         Button {
           withAnimation(.spring(duration: 1)) {

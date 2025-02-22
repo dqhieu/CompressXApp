@@ -25,10 +25,25 @@ enum NotchStyle: String, CaseIterable {
   }
 }
 
+enum MenuBarIconStyle: String, CaseIterable {
+  case sameAsDock
+  case simple
+
+  var displayText: String {
+    switch self {
+    case .sameAsDock:
+      return "Same as dock"
+    case .simple:
+      return "Simple"
+    }
+  }
+}
+
 struct AppearanceSettingsV2View: View {
 
   @AppStorage("selectedAppIconName") var selectedAppIconName = "AppIcon"
   @AppStorage("notchStyle") var notchStyle: NotchStyle = .expanded
+  @AppStorage("menuBarIconStyle") var menuBarIconStyle: MenuBarIconStyle = .sameAsDock
   @AppStorage("confettiEnabled") var confettiEnabled = false
 
   var body: some View {
@@ -50,7 +65,7 @@ struct AppearanceSettingsV2View: View {
         Toggle(isOn: $confettiEnabled) {
           VStack(alignment: .leading) {
             Text("Show confetti when compression finishes")
-            Text("Requires [Raycast](https://www.raycast.com/) to be installed. [Read the docs](https://docs.compressx.app/guides/how-to-show-confetti-when-compression-finishes) or [test confetti](raycast://confetti)")
+            Text("Requires [Raycast](https://www.raycast.com/) to be installed. [Read the docs](https://docs.compresto.app/guides/how-to-show-confetti-when-compression-finishes) or [test confetti](raycast://confetti)")
               .foregroundStyle(.secondary)
               .font(.caption)
           }
@@ -61,6 +76,13 @@ struct AppearanceSettingsV2View: View {
           } else {
             confettiEnabled = false
           }
+        }
+        Picker(selection: $menuBarIconStyle) {
+          ForEach(MenuBarIconStyle.allCases, id: \.self) { style in
+            Text(style.displayText).tag(style.rawValue)
+          }
+        } label: {
+          Text("Menu bar icon style")
         }
       }
       Section {

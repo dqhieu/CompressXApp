@@ -32,10 +32,13 @@ struct CompressView: View {
   @AppStorage("videoGifQuality") var videoGifQuality: VideoQuality = .high
   @AppStorage("didOpenProductHuntLink") var didOpenProductHuntLink = false
   @AppStorage("onDropBehavior") var onDropBehavior: OnDropBehavior = .replace
-  @AppStorage("imageDimension") var imageDimension: ImageDimension = .same
+  @AppStorage("imageSize") var imageSize: ImageSize = .same
   @AppStorage("videoDimension") var videoDimension: VideoDimension = .same
   @AppStorage("removeAudio") var removeAudio = false
   @AppStorage("pdfQuality") var pdfQuality: PDFQuality = .balance
+  @AppStorage("subfolderProcessing") var subfolderProcessing: SubfolderProcessing = .none
+  @AppStorage("subfolderProcessingLimit") var subfolderProcessingLimit = 1
+
   @ObservedObject var jobManager = JobManager.shared
 
   @State private var lastWindowRect: NSRect?
@@ -63,6 +66,9 @@ struct CompressView: View {
   @State private var inputFiles: [InputFile] = []
   @State private var startTimes: [URL: CMTime] = [:]
   @State private var endTimes: [URL: CMTime] = [:]
+  @State private var subfolderProcessingLimitText = "1"
+
+  @State private var inputPaths: [URL] = []
 
   var videoQualities: [VideoQuality] {
     if showPreserveTransparency && shouldPreserveTransparency && outputFormat != .webm {
@@ -79,7 +85,7 @@ struct CompressView: View {
         VStack {
           HStack {
             Spacer()
-            Text("CompressX")
+            Text("Compresto")
               .fontWeight(.bold)
               .foregroundStyle(
                 LinearGradient(
@@ -178,15 +184,25 @@ struct CompressView: View {
                     Image(systemName: "video")
                       .resizable()
                       .aspectRatio(contentMode: .fit)
-                      .frame(width: 100, height: 100, alignment: .center)
-                      .rotationEffect(Angle(degrees: isHovering ? -7 : -5))
+                      .frame(width: 70, height: 70, alignment: .center)
+                      .rotationEffect(Angle(degrees: isHovering ? -10 : -7))
+                      .scaleEffect(isHovering ? 1.05 : 1)
+                      .offset(x: 20)
+                    Image(systemName: "doc")
+                      .resizable()
+                      .aspectRatio(contentMode: .fit)
+                      .frame(width: 60, height: 60, alignment: .center)
+                      .scaleEffect(isHovering ? 1.05 : 1)
+                      .offset(y: -20)
                     Image(systemName: "photo")
                       .resizable()
                       .aspectRatio(contentMode: .fit)
-                      .frame(width: 90, height: 90, alignment: .center)
-                      .rotationEffect(Angle(degrees: isHovering ? 7 : 5))
+                      .frame(width: 60, height: 60, alignment: .center)
+                      .rotationEffect(Angle(degrees: isHovering ? 10 : 7))
+                      .scaleEffect(isHovering ? 1.05 : 1)
+                      .offset(x: -20)
                   }
-                  Text("Tap to select videos / images / gifs")
+                  Text("Tap to select videos / images / gifs / pdfs")
                   Text("or")
                   Text("drop them here")
                   Spacer()
@@ -206,7 +222,8 @@ struct CompressView: View {
             }
           }
           .dropDestination(for: URL.self) { items, location in
-            return onDropFiles(items: items)
+            handleOnDropFiles(urls: items)
+            return true
           }
         }
         .padding([.top, .leading, .bottom], 20)
@@ -217,7 +234,7 @@ struct CompressView: View {
               Section {
                 HStack {
                   if jobManager.inputFileURLs.count == 1 {
-                    Text("Input file")
+                    Text("Input file (1)")
                   } else {
                     Text("Input files (\(jobManager.inputFileURLs.count))")
                   }
@@ -227,6 +244,7 @@ struct CompressView: View {
                     inputFiles.removeAll()
                     jobManager.jobs.removeAll()
                     _ = validateInputFile(urls: [])
+                    inputPaths = []
                   } label: {
                     Text("Clear")
                   }
@@ -237,6 +255,57 @@ struct CompressView: View {
                     Text("Change")
                   }
                   .disabled(jobManager.isRunning)
+                }
+                if hasSubfolders(urls: inputPaths) {
+                  VStack {
+                    Picker(selection: $subfolderProcessing) {
+                      ForEach(SubfolderProcessing.allCases, id: \.self) { behavior in
+                        Text(behavior.displayText).tag(behavior.rawValue)
+                      }
+                    } label: {
+                      Text("Include subfolders")
+                    }
+                    .onChange(of: subfolderProcessing, perform: { newValue in
+                      let maxDepth: Int = {
+                        switch newValue {
+                        case .all:
+                          return 1_000_000
+                        case .none:
+                          return 1
+                        case .custom:
+                          return subfolderProcessingLimit
+                        }
+                      }()
+                      updateInputFiles(maxDepth: maxDepth)
+                    })
+                    .onChange(of: subfolderProcessingLimit, perform: { newValue in
+                      subfolderProcessingLimitText = String(newValue)
+                      updateInputFiles(maxDepth: newValue)
+                    })
+                    if subfolderProcessing == .custom {
+                      HStack {
+                        Text("Max depth")
+                          .font(.caption)
+                          .foregroundStyle(.secondary)
+                        Spacer()
+                        TextField("", text: $subfolderProcessingLimitText)
+                          .frame(width: 50)
+                          .textFieldStyle(.squareBorder)
+                          .labelsHidden()
+                          .multilineTextAlignment(.trailing)
+                          .onSubmit(onMaxDepthSubmittion)
+                        Button {
+                          onMaxDepthSubmittion()
+                        } label: {
+                          Text("Update")
+                        }
+                        .disabled(Int(subfolderProcessingLimitText) == subfolderProcessingLimit)
+                      }
+                      .task {
+                        subfolderProcessingLimitText = String(subfolderProcessingLimit)
+                      }
+                    }
+                  }
                 }
               }
             }
@@ -421,14 +490,14 @@ struct CompressView: View {
                   .foregroundStyle(.red)
                 if message.lowercased().contains("bad cpu type in executable") {
                   Button {
-                    NSWorkspace.shared.open(URL(string: "https://docs.compressx.app/guides/how-to-resolve-error-bad-cpu-type-in-executable-on-macos")!)
+                    NSWorkspace.shared.open(URL(string: "https://docs.compresto.app/guides/how-to-resolve-error-bad-cpu-type-in-executable-on-macos")!)
                   } label: {
                     Text("Open documentation")
                   }
                 }
                 if message.lowercased().contains("ghostscript is not installed") {
                   Button {
-                    NSWorkspace.shared.open(URL(string: "https://docs.compressx.app/guides/how-to-setup-pdf-compression")!)
+                    NSWorkspace.shared.open(URL(string: "https://docs.compresto.app/guides/how-to-setup-pdf-compression")!)
                   } label: {
                     Text("Setup PDF compression")
                   }
@@ -497,12 +566,28 @@ struct CompressView: View {
               }
             }
             OpenWithHandler.shared.onPasteFiles { urls in
-              _ = onDropFiles(items: urls)
+              handleOnDropFiles(urls: urls)
             }
           }
         }
       }
     }
+  }
+
+  func handleOnDropFiles(urls: [URL]) {
+    inputPaths = urls
+    let maxDepth: Int = {
+      switch subfolderProcessing {
+      case .all:
+        return 1_000_000
+      case .none:
+        return 1
+      case .custom:
+        return subfolderProcessingLimit
+      }
+    }()
+    let files = flatten(urls: urls, maxDepth: maxDepth)
+    onDropFiles(items: files)
   }
 
   func openFileSelectionPanel() {
@@ -514,7 +599,20 @@ struct CompressView: View {
     panel.allowedContentTypes = videoSupportedTypes + imageSupportedTypes + pdfSupportedTypes
     let response = panel.runModal()
     if response == .OK {
-      setSourceFile(urls: panel.urls)
+      let urls = panel.urls
+      let maxDepth: Int = {
+        switch subfolderProcessing {
+        case .all:
+          return 1_000_000
+        case .none:
+          return 1
+        case .custom:
+          return subfolderProcessingLimit
+        }
+      }()
+      let files = flatten(urls: urls, maxDepth: maxDepth)
+      inputPaths = urls
+      setSourceFile(urls: files)
     }
   }
 
@@ -613,8 +711,7 @@ struct CompressView: View {
   }
 
   func setSourceFile(urls: [URL]) {
-    let files = flattenFolder(urls: urls)
-    let filteredURLs = validateInputFile(urls: files)
+    let filteredURLs = validateInputFile(urls: urls)
     jobManager.inputFileURLs = filteredURLs
     setInputFiles(urls: filteredURLs)
     jobManager.jobs.removeAll()
@@ -657,18 +754,18 @@ struct CompressView: View {
       return showActivateLicenseAlert()
     }
     errorMessage = nil
-    if let type = jobs.first?.outputType {
-      switch type {
+    for job in jobs {
+      switch job.outputType {
       case .video(let videoQuality, let videoDimension, let videoFormat, _, let removeAudio, let preserveTransparency, _, _):
         self.videoQuality = videoQuality
         self.outputFormat = videoFormat
         self.removeAudio = removeAudio
         self.shouldPreserveTransparency = preserveTransparency
         self.videoDimension = videoDimension
-      case .image(let imageQuality, let imageFormat, let imageDimension):
+      case .image(let imageQuality, let imageFormat, let imageSize, _):
         self.imageQuality = imageQuality
         self.outputImageFormat = imageFormat
-        self.imageDimension = imageDimension
+        self.imageSize = imageSize
       case .gifCompress(let gifQuality, let dimension):
         self.gifQuality = gifQuality
         self.gifDimension = dimension
@@ -676,8 +773,8 @@ struct CompressView: View {
         self.videoGifQuality = gifQuality
         self.videoGifDimension = dimension
         self.fpsValue = Double(fpsValue)
-      case .pdfCompress:
-        break
+      case .pdfCompress(let pdfQuality):
+        self.pdfQuality = pdfQuality
       }
     }
     if !notifyWhenFinish {
@@ -702,7 +799,7 @@ struct CompressView: View {
       removeInputFile: removeFileAfterCompress,
       imageQuality: imageQuality,
       imageFormat: outputImageFormat,
-      imageDimension: imageDimension,
+      imageSize: imageSize,
       videoQuality: videoQuality,
       videoDimension: videoDimension,
       videoGifQuality: videoGifQuality,
@@ -754,50 +851,13 @@ struct CompressView: View {
             let totalOutputFileSize = jobs.map { $0.outputFileSize ?? 0 }.reduce(0,+)
             reducedSizeString = fileSizeString(from: totalInputFileSize - totalOutputFileSize)
           }
-          let successCount = jobs.map { FileManager.default.fileExists(atPath: $0.outputFileURL.path(percentEncoded: false)) ? 1 : 0 }.reduce(0,+)
-          if notifyWhenFinish, successCount > 0 {
-            let successCount = jobs.map { FileManager.default.fileExists(atPath: $0.outputFileURL.path(percentEncoded: false)) ? 1 : 0 }.reduce(0,+)
-            let path = jobs.first!.outputFileURL.deletingLastPathComponent().path(percentEncoded: false)
-            let content = UNMutableNotificationContent()
-            content.title = "Compression finished 🎉"
-            content.body = "\(successCount) files saved to \(path). Tap to open them in Finder"
-            content.userInfo = ["fileURLs": jobs.map { $0.outputFileURL.absoluteString }]
-            content.sound = .default
-            let request = UNNotificationRequest(identifier: "compress.finish." + UUID().uuidString, content: content, trigger: nil)
-            Task {
-              try? await UNUserNotificationCenter.current().add(request)
-            }
-          }
         } else if jobs.count == 1, let job = jobs.first {
           if let error = job.error {
-            errorMessage = error
-
-            if notifyWhenFinish {
-              let content = UNMutableNotificationContent()
-              content.title = "Compression failed ❌"
-              content.body = error
-              content.sound = .default
-              let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)
-              Task {
-                try? await UNUserNotificationCenter.current().add(request)
-              }
-            }
           } else {
             if (job.inputFileSize ?? 0) - (job.outputFileSize ?? 0) <= 0 && outputFormat == .gif {
               reducedSizeString = nil
             } else {
               reducedSizeString = fileSizeString(from: (job.inputFileSize ?? 0) - (job.outputFileSize ?? 0))
-            }
-            if notifyWhenFinish, FileManager.default.fileExists(atPath: job.outputFileURL.path(percentEncoded: false)) {
-              let content = UNMutableNotificationContent()
-              content.title = "Compression finished 🎉"
-              content.body = "File saved to \(job.outputFileURL.path(percentEncoded: false)). Tap to open in Finder"
-              content.userInfo = ["fileURLs": [job.outputFileURL.absoluteString]]
-              content.sound = .default
-              let request = UNNotificationRequest(identifier: "compress.finish." + UUID().uuidString, content: content, trigger: nil)
-              Task {
-                try? await UNUserNotificationCenter.current().add(request)
-              }
             }
           }
         }
@@ -805,14 +865,14 @@ struct CompressView: View {
     }
   }
 
-  func onDropFiles(items: [URL], dropInfo: DropInfo? = nil) -> Bool {
+  func onDropFiles(items: [URL]) {
     if jobManager.isRunning {
       let newJobs = jobManager.createJobs(
         inputFileURLs: items,
         removeInputFile: removeFileAfterCompress,
         imageQuality: imageQuality,
         imageFormat: outputImageFormat,
-        imageDimension: imageDimension,
+        imageSize: imageSize,
         videoQuality: videoQuality,
         videoDimension: videoDimension,
         videoGifQuality: videoGifQuality,
@@ -830,7 +890,6 @@ struct CompressView: View {
       )
       jobManager.queue(newJobs: newJobs)
       setInputFiles(urls: jobManager.inputFileURLs)
-      return true
     } else {
       let optionKeyPressed = NSEvent.modifierFlags.contains(.option)
       if optionKeyPressed {
@@ -848,7 +907,6 @@ struct CompressView: View {
           setSourceFile(urls: currentFiles + newFiles)
         }
       }
-      return true
     }
   }
 
@@ -865,5 +923,22 @@ struct CompressView: View {
     alert.alertStyle = .critical
     alert.addButton(withTitle: "OK")
     let _ = alert.runModal()
+  }
+
+  func onMaxDepthSubmittion() {
+    if let limit = Int(subfolderProcessingLimitText), limit > 0 {
+      subfolderProcessingLimit = abs(limit)
+    } else {
+      let alert = NSAlert()
+      alert.messageText = "Invalid value"
+      alert.informativeText = "Value must be an positive integer"
+      alert.addButton(withTitle: "OK")
+      let _ = alert.runModal()
+    }
+  }
+
+  func updateInputFiles(maxDepth: Int) {
+    let files = flatten(urls: inputPaths, maxDepth: maxDepth)
+    setSourceFile(urls: files)
   }
 }

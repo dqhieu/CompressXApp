@@ -60,6 +60,15 @@ class Job: Identifiable {
 
   var tmpInputFileURL: URL?
 
+  var reducedPercentage: String? {
+    if let inputSize = inputFileSize, let outputSize = outputFileSize, outputSize < inputSize {
+      let percentage = Double(outputSize) / Double(inputSize) * 100
+      let percentageInt = Int(100 - percentage)
+      return "\(percentageInt)%"
+    }
+    return nil
+  }
+
   init(
     inputFileURL: URL,
     outputType: OutputType,
@@ -94,7 +103,7 @@ class Job: Identifiable {
       } else {
         outputFileURL = outputFolderURL.appendingPathComponent(intputFileNameWithoutExtension + format + "." + inputFileURL.pathExtension)
       }
-    case .image(_, let imageFormat, _):
+    case .image(_, let imageFormat, _, _):
       if isRawImage(url: inputFileURL), let url = preProcessRawImage(inputFileURL: inputFileURL) {
         self.tmpInputFileURL = inputFileURL
         self.inputFileURL = url
@@ -192,7 +201,7 @@ enum OutputType {
     startTime: CMTime?,
     endTime: CMTime?
   )
-  case image(imageQuality: ImageQuality, imageFormat: ImageFormat, imageDimension: ImageDimension)
+  case image(imageQuality: ImageQuality, imageFormat: ImageFormat, imageSize: ImageSize, imageSizeValue: Int)
   case gif(gifQuality: VideoQuality, fpsValue: Int, dimension: GifDimension)
   case gifCompress(gifQuality: VideoQuality, dimension: GifDimension)
   case pdfCompress(pdfQuality: PDFQuality)
@@ -238,6 +247,8 @@ class JobManager: ObservableObject {
   @AppStorage("retainImageMetadata") var retainImageMetadata = false
   @AppStorage("copyOutputFilesToClipboard") var copyCompressedFilesToClipboard = false
   @AppStorage("confettiEnabled") var confettiEnabled = false
+  @AppStorage("notifyWhenFinish") var notifyWhenFinish = false
+  @AppStorage("imageSizeValue") var imageSizeValue = 100
 
   @Published var isRunning = false
   @Published var inputFileURLs: [URL] = []
@@ -349,7 +360,7 @@ class JobManager: ObservableObject {
             "-c:a",
             "copy",
             "-map",
-            "0:v",
+            "0:v:0",
             "-map",
             "0:a"
           ])
@@ -372,7 +383,7 @@ class JobManager: ObservableObject {
       if !isValidFFmpegPath(ffmpegPath) {
         error = "FFmpeg setting is not correct"
       }
-    case .image(let imageQuality, let imageFormat, let imageDimension):
+    case .image(let imageQuality, let imageFormat, let imageSize, let imageSizeValue):
       let isPngInput = isPNGFile(url: job.inputFileURL)
       let isPngOutput = imageFormat == .same || imageFormat == .png
       if isPngInput && isPngOutput {
@@ -397,7 +408,7 @@ class JobManager: ObservableObject {
           "-i",
           job.inputFileURL.path(percentEncoded: false)
         ])
-        if let imageRep = NSImageRep(contentsOf: job.inputFileURL), let additionalParams = getFFmpegParam(imageSize: CGSize(width: imageRep.pixelsWide, height: imageRep.pixelsHigh), dimension: imageDimension) {
+        if let imageRep = NSImageRep(contentsOf: job.inputFileURL), let additionalParams = getFFmpegParam(size: CGSize(width: imageRep.pixelsWide, height: imageRep.pixelsHigh), imageSize: imageSize, imageSizeValue: imageSizeValue) {
           arguments.append(contentsOf: additionalParams)
         }
         arguments.append(contentsOf: [
@@ -416,7 +427,7 @@ class JobManager: ObservableObject {
           "-i",
           job.inputFileURL.path(percentEncoded: false)
         ])
-        if let imageRep = NSImageRep(contentsOf: job.inputFileURL), let additionalParams = getFFmpegParam(imageSize: CGSize(width: imageRep.pixelsWide, height: imageRep.pixelsHigh), dimension: imageDimension) {
+        if let imageRep = NSImageRep(contentsOf: job.inputFileURL), let additionalParams = getFFmpegParam(size: CGSize(width: imageRep.pixelsWide, height: imageRep.pixelsHigh), imageSize: imageSize, imageSizeValue: imageSizeValue) {
           arguments.append(contentsOf: additionalParams)
         }
         arguments.append(contentsOf: [
@@ -517,19 +528,20 @@ class JobManager: ObservableObject {
     guard FileManager.default.fileExists(atPath: job.inputFileURL.path(percentEncoded: false)) else {
       return "Input file does not exist"
     }
-    if case .image(let imageQuality, let imageFormat, let imageDimension) = job.outputType, (imageFormat == .webp || imageFormat == .same && job.isWebP) {
+    if case .image(let imageQuality, let imageFormat, let imageSize, let imageSizeValue) = job.outputType, (imageFormat == .webp || imageFormat == .same && job.isWebP) {
       return WebPCoder.shared.convert(
         inputURL: job.inputFileURL,
         outputURL: job.outputFileURL,
         imageQuality: imageQuality,
-        imageDimension: imageDimension
+        imageSize: imageSize,
+        imageSizeValue: imageSizeValue
       )
     }
-    if case .image(let imageQuality, let imageFormat, let imageDimension) = job.outputType, isSVGFile(url: job.inputFileURL) {
-      return SVGProcessor.convert(job: job, imageQuality: imageQuality, imageFormat: imageFormat, imageDimension: imageDimension)
+    if case .image(let imageQuality, let imageFormat, let imageSize, let imageSizeValue) = job.outputType, isSVGFile(url: job.inputFileURL) {
+      return SVGProcessor.convert(job: job, imageQuality: imageQuality, imageFormat: imageFormat, imageSize: imageSize, imageSizeValue: imageSizeValue)
     }
-    if case .image(let imageQuality, let imageFormat, let imageDimension) = job.outputType, isSVGFile(url: job.inputFileURL), isTiffFile(url: job.inputFileURL), imageFormat == .same {
-      return TIFFProcessor.compress(job: job, imageQuality: imageQuality, imageFormat: imageFormat, imageDimension: imageDimension)
+    if case .image(let imageQuality, let imageFormat, let imageSize, let imageSizeValue) = job.outputType, isSVGFile(url: job.inputFileURL), isTiffFile(url: job.inputFileURL), imageFormat == .same {
+      return TIFFProcessor.compress(job: job, imageQuality: imageQuality, imageFormat: imageFormat, imageSize: imageSize, imageSizeValue: imageSizeValue)
     }
     if case .pdfCompress = job.outputType, ghostscriptPath.isEmpty {
       return "Ghostscript is not installed"
@@ -689,7 +701,7 @@ class JobManager: ObservableObject {
       removeFileIfNeeded(job: job)
       trackFinishJob(job)
       setFileCreationIfNeeded(job: job)
-
+      
       i += 1
 
       if index >= jobs.count { break }
@@ -709,6 +721,7 @@ class JobManager: ObservableObject {
       if confettiEnabled, successCount > 0, let url = URL(string: "raycast://confetti") {
         NSWorkspace.shared.open(url)
       }
+      sendPushNotificationIfNeeded()
     }
     NoSleep.enableSleep()
     return self.jobs
@@ -778,6 +791,18 @@ class JobManager: ObservableObject {
     }
   }
 
+  func sendPushNotificationIfNeeded() {
+    let successCount = jobs.map { FileManager.default.fileExists(atPath: $0.outputFileURL.path(percentEncoded: false)) ? 1 : 0 }.reduce(0,+)
+    if notifyWhenFinish {
+      if successCount > 0, let job = jobs.first {
+        let path = job.outputFileURL.deletingLastPathComponent().path(percentEncoded: false)
+        sendSuccessPushNotification(path: path, count: successCount, urls: jobs.map { $0.outputFileURL.absoluteString })
+      } else if let error = jobs.first(where: { $0.error != nil })?.error {
+        sendErrorPushNotification(error: error)
+      }
+    }
+  }
+
   func copyEXIFData(job: Job) throws {
     let sourceURL = job.inputFileURL
     let destinationURL = job.outputFileURL
@@ -841,7 +866,7 @@ class JobManager: ObservableObject {
     removeInputFile: Bool,
     imageQuality: ImageQuality,
     imageFormat: ImageFormat,
-    imageDimension: ImageDimension,
+    imageSize: ImageSize,
     videoQuality: VideoQuality,
     videoDimension: VideoDimension,
     videoGifQuality: VideoQuality,
@@ -865,9 +890,19 @@ class JobManager: ObservableObject {
         case .image(let imageType):
           switch imageType {
           case .jpg:
-            return .image(imageQuality: imageQuality, imageFormat: imageFormat, imageDimension: imageDimension)
+            return .image(
+              imageQuality: imageQuality,
+              imageFormat: imageFormat,
+              imageSize: imageSize,
+              imageSizeValue: imageSizeValue
+            )
           case .png:
-            return .image(imageQuality: imageQuality, imageFormat: imageFormat, imageDimension: imageDimension)
+            return .image(
+              imageQuality: imageQuality,
+              imageFormat: imageFormat,
+              imageSize: imageSize,
+              imageSizeValue: imageSizeValue
+            )
           }
         case .video:
           if videoFormat == .gif {

@@ -88,6 +88,7 @@ struct NotchView: View {
   @State private var scale = 0.5
   @State private var offset = 47.5
   @State private var alpha = 1.0
+  @State private var blur = 20.0
   @State private var isMinimized = false
   @State private var workItem: DispatchWorkItem?
   @State private var autoDismissWorkItem: DispatchWorkItem?
@@ -154,6 +155,7 @@ struct NotchView: View {
           }
           .foregroundStyle(.white)
           .opacity(alpha)
+          .blur(radius: blur)
           .onTapGesture {
             withAnimation(.spring()) {
               isMinimized = false
@@ -184,6 +186,7 @@ struct NotchView: View {
                 }
               }
               .opacity(alpha)
+              .blur(radius: blur)
               .animation(.spring(), value: jobManager.isRunning)
               .transition(.asymmetric(insertion: .push(from: .top).combined(with: .opacity), removal: .push(from: .bottom).combined(with: .opacity)))
               HStack {
@@ -219,6 +222,7 @@ struct NotchView: View {
                 }
               }
             }
+            .blur(radius: blur)
             .transition(.asymmetric(insertion: .push(from: .top).combined(with: .opacity), removal: .push(from: .bottom).combined(with: .opacity)))
           }
         }
@@ -277,7 +281,10 @@ struct NotchView: View {
     withAnimation(.spring()) {
       scale = 1.0
       offset = 0
+    }
+    withAnimation(.spring().delay(0.1)) {
       alpha = 1.0
+      blur = 0.0
     }
   }
 
@@ -292,6 +299,7 @@ struct NotchView: View {
         offset = 47.5 * 2
       }
       alpha = 0.0
+      blur = 20.0
     }
     DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
       onClose()

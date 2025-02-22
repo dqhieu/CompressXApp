@@ -13,6 +13,8 @@ class DeeplinkParser {
 
   @AppStorage("outputFileNameFormat") var outputFileNameFormat = ""
   @AppStorage("removeFileAfterCompress") var removeFileAfterCompress = false
+  @AppStorage("subfolderProcessing") var subfolderProcessing: SubfolderProcessing = .none
+  @AppStorage("subfolderProcessingLimit") var subfolderProcessingLimit = 1
 
   static let shared = DeeplinkParser()
 
@@ -27,9 +29,9 @@ class DeeplinkParser {
           case .image(let imageType):
             switch imageType {
             case .jpg:
-              return .image(imageQuality: .high, imageFormat: .same, imageDimension: .same)
+              return .image(imageQuality: .high, imageFormat: .same, imageSize: .same, imageSizeValue: 100)
             case .png:
-              return .image(imageQuality: .high, imageFormat: .same, imageDimension: .same)
+              return .image(imageQuality: .high, imageFormat: .same, imageSize: .same, imageSizeValue: 100)
             }
           case .gif:
             return .gifCompress(gifQuality: .high, dimension: .same)
@@ -62,7 +64,7 @@ class DeeplinkParser {
         } else {
           return []
         }
-      case "compressx": // deeplink
+      case "compressx", "compresto": // deeplink
         // example deeplink: compressx://open?path=file:///Users/hieudinh/Desktop/acquired.mp4
         switch components.host {
         case "open":
@@ -80,7 +82,20 @@ class DeeplinkParser {
                   if path.suffix(1) != "/" {
                     newPath += "/"
                   }
-                  let fileURLs = flattenFolder(urls: [URL(string: String(newPath))!])
+                  let maxDepth: Int = {
+                    if let subfolderProcessingValue = components.queryItems?.first(where: { $0.name == "subfolderProcessing"} )?.value {
+                      switch subfolderProcessingValue.lowercased() {
+                      case "none":
+                        return 1
+                      case "all":
+                        return 1_000_000
+                      default:
+                        return Int(subfolderProcessingValue.lowercased()) ?? 1
+                      }
+                    }
+                    return 1
+                  }()
+                  let fileURLs = flatten(urls: [URL(string: String(newPath))!], maxDepth: maxDepth)
                   for fileURL in fileURLs {
                     if let job = createJob(fileURL: fileURL, components: components) {
                       jobs.append(job)
@@ -218,9 +233,9 @@ class DeeplinkParser {
       case .image(let imageType):
         switch imageType {
         case .jpg:
-          return .image(imageQuality: imageQuality, imageFormat: imageFormat, imageDimension: .same)
+          return .image(imageQuality: imageQuality, imageFormat: imageFormat, imageSize: .same, imageSizeValue: 100)
         case .png:
-          return .image(imageQuality: imageQuality, imageFormat: imageFormat, imageDimension: .same)
+          return .image(imageQuality: imageQuality, imageFormat: imageFormat, imageSize: .same, imageSizeValue: 100)
         }
       case .gif:
         return .gifCompress(gifQuality: gifQuality, dimension: .same)

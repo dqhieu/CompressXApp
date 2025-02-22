@@ -60,7 +60,8 @@ class Watcher {
               return .image(
                 imageQuality: updatedSetting.imageQuality,
                 imageFormat: updatedSetting.imageFormat ?? .same,
-                imageDimension: updatedSetting.imageDimension ?? .same
+                imageSize: updatedSetting.imageSize ?? .same,
+                imageSizeValue: updatedSetting.imageSizeValue ?? 100
               )
             case .video:
               return .video(

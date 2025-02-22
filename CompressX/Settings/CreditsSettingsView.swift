@@ -46,7 +46,7 @@ struct CreditsSettingsView: View {
           }
         }
       } header: {
-        Text("CompressX is powered by awesome open source projects. Special thanks to:")
+        Text("Compresto is powered by awesome open source projects. Special thanks to:")
       }
 
     }

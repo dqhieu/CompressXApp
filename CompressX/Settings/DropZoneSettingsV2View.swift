@@ -25,6 +25,7 @@ enum DropZoneCompressionFileType: String, CaseIterable {
   case video
   case image
   case gif
+  case pdf
 
   var displayText: String {
     switch self {
@@ -34,6 +35,8 @@ enum DropZoneCompressionFileType: String, CaseIterable {
       return "Image"
     case .gif:
       return "GIF"
+    case .pdf:
+      return "PDF"
     }
   }
 }
@@ -48,7 +51,8 @@ struct DropZoneSettingsV2View: View {
 
   @AppStorage("dropZoneImageQuality") var imageQuality: ImageQuality = .good
   @AppStorage("dropZoneImageFormat") var imageFormat: ImageFormat = .same
-  @AppStorage("dropZoneImageDimension") var imageDimension: ImageDimension = .same
+  @AppStorage("dropZoneImageSize") var imageSize: ImageSize = .same
+  @AppStorage("dropZoneImageSizeValue") var dropZoneImageSizeValue = 100
 
   @AppStorage("dropZoneVideoQuality") var videoQuality: VideoQuality = .good
   @AppStorage("dropZoneVideoFormat") var videoFormat: VideoFormat = .same
@@ -59,9 +63,13 @@ struct DropZoneSettingsV2View: View {
   @AppStorage("dropZoneGifQuality") var gifQuality: VideoQuality = .good
   @AppStorage("dropZoneGifDimension") var gifDimension: GifDimension = .same
 
+  @AppStorage("dropZonePdfQuality") var dropZonePdfQuality: PDFQuality = .balance
+
   @AppStorage("dropZoneOutputFolder") var outputFolder: OutputFolder = .same
   @AppStorage("dropZoneCustomOutputFolder") var customOutputFolder: String = ""
   @AppStorage("dropZoneRemoveFileAfterCompression") var removeFileAfterCompression: Bool = false
+
+  @State private var dropZoneImageSizeValueText = "100"
 
   var body: some View {
     Form {
@@ -168,12 +176,40 @@ struct DropZoneSettingsV2View: View {
                 }
               }
               .pickerStyle(.menu)
-              Picker("Image size", selection: $imageDimension) {
-                ForEach(ImageDimension.allCases, id: \.self) { dimension in
-                  Text(dimension.displayText).tag(dimension.rawValue)
+              VStack {
+                Picker("Image size", selection: $imageSize) {
+                  ForEach(ImageSize.allCases, id: \.self) { size in
+                    Text(size.displayText).tag(size.rawValue)
+                  }
+                }
+                .pickerStyle(.menu)
+                if imageSize != .same {
+                  HStack {
+                    TextField("Value", text: $dropZoneImageSizeValueText, onEditingChanged: { (editingChanged) in
+                      if !editingChanged {
+                        onSubmittion()
+                      }
+                    })
+                    .frame(width: 100)
+                    .textFieldStyle(.squareBorder)
+                    .labelsHidden()
+                    .multilineTextAlignment(.trailing)
+                    .onSubmit(onSubmittion)
+                    .task {
+                      dropZoneImageSizeValueText = String(dropZoneImageSizeValue)
+                    }
+                    Text(imageSize == .percentage ? "%" : "px")
+                      .foregroundStyle(.secondary)
+                    Spacer()
+                    Button {
+                      onSubmittion()
+                    } label: {
+                      Text("Update")
+                    }
+                    .disabled(dropZoneImageSizeValue == Int(dropZoneImageSizeValueText))
+                  }
                 }
               }
-              .pickerStyle(.menu)
             }
             if fileType == .gif {
               Picker(selection: $gifQuality) {
@@ -190,6 +226,16 @@ struct DropZoneSettingsV2View: View {
                 }
               } label: {
                 Text("Gif dimension")
+              }
+              .pickerStyle(.menu)
+            }
+            if fileType == .pdf {
+              Picker(selection: $dropZonePdfQuality) {
+                ForEach(PDFQuality.allCases, id: \.self) { quality in
+                  Text(quality.displayText).tag(quality.rawValue)
+                }
+              } label: {
+                Text("PDF quality")
               }
               .pickerStyle(.menu)
             }
@@ -213,6 +259,22 @@ struct DropZoneSettingsV2View: View {
       customOutputFolder = customOutputFolder
     } else if customOutputFolder.isEmpty {
       outputFolder = .same
+    }
+  }
+
+  func onSubmittion() {
+    if let value = Int(dropZoneImageSizeValueText), value > 0 && value <= 65535 {
+      dropZoneImageSizeValue = value
+    } else {
+      let alert = NSAlert()
+      alert.messageText = "Invalid value"
+      if (Int(dropZoneImageSizeValueText) ?? 0) <= 0 {
+        alert.informativeText = "Value must be an positive integer"
+      } else if (Int(dropZoneImageSizeValueText) ?? 0) > 65535 {
+        alert.informativeText = "Value is too large"
+      }
+      alert.addButton(withTitle: "OK")
+      let _ = alert.runModal()
     }
   }
 }

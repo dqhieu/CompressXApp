@@ -69,6 +69,9 @@ struct OutputView: View {
                           .foregroundStyle(.orange)
                       }
                       Text(fileSizeString(from: reducedSize))
+                      if let reducedPercentage = job.reducedPercentage {
+                        Text("(\(reducedPercentage))")
+                      }
                       Spacer()
                       Image(systemName: "arrow.right")
                         .foregroundStyle(.secondary)
@@ -88,6 +91,9 @@ struct OutputView: View {
           Text(jobManager.jobs.count == 1 ? "Size reduced" : "Total size reduced")
           Spacer()
           Text(reducedSizeString)
+          if jobManager.jobs.count == 1, let job = jobManager.jobs.first, let reducedPercentage = job.reducedPercentage {
+            Text("(\(reducedPercentage))")
+          }
         }
       }
       if let timeTaken = timeTaken {

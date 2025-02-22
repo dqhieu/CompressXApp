@@ -19,7 +19,8 @@ class DropZoneManager: ObservableObject {
 
   @AppStorage("dropZoneImageQuality") var dropZoneImageQuality: ImageQuality = .good
   @AppStorage("dropZoneImageFormat") var dropZoneImageFormat: ImageFormat = .same
-  @AppStorage("dropZoneImageDimension") var dropZoneImageDimension: ImageDimension = .same
+  @AppStorage("dropZoneImageSize") var dropZoneImageSize: ImageSize = .same
+  @AppStorage("dropZoneImageSizeValue") var dropZoneImageSizeValue = 100
   @AppStorage("dropZoneVideoQuality") var dropZoneVideoQuality: VideoQuality = .good
   @AppStorage("dropZoneVideoFormat") var dropZoneVideoFormat: VideoFormat = .same
   @AppStorage("dropZoneVideoDimension") var dropZoneVideoDimension: VideoDimension = .same
@@ -30,10 +31,12 @@ class DropZoneManager: ObservableObject {
   @AppStorage("dropZoneOutputFolder") var dropZoneOutputFolder: OutputFolder = .same
   @AppStorage("dropZoneCustomOutputFolder") var dropZoneCustomOutputFolder: String = ""
   @AppStorage("dropZoneRemoveFileAfterCompression") var dropZoneRemoveFileAfterCompression: Bool = false
+  @AppStorage("dropZonePdfQuality") var dropZonePdfQuality: PDFQuality = .balance
 
   @AppStorage("imageQuality") var defaultImageQuality: ImageQuality = .highest
   @AppStorage("outputImageFormat") var defaultImageFormat: ImageFormat = .same
-  @AppStorage("imageDimension") var defaultImageDimension: ImageDimension = .same
+  @AppStorage("imageSize") var defaultImageSize: ImageSize = .same
+  @AppStorage("imageSizeValue") var defaultImageSizeValue = 100
 
   @AppStorage("videoQuality") var defaultVideoQuality: VideoQuality = .high
   @AppStorage("outputFormat") var defaultVideoFormat: VideoFormat = .same
@@ -41,6 +44,7 @@ class DropZoneManager: ObservableObject {
   @AppStorage("removeAudio") var defaultRemoveAudio = false
   @AppStorage("gifQuality") var defaultGifQuality: VideoQuality = .high
   @AppStorage("gifDimension") var defaultGifDimension: GifDimension = .same
+  @AppStorage("pdfQuality") var defaultPdfQuality: PDFQuality = .balance
   @AppStorage("outputFolder") var defaultOutputFolder: OutputFolder = .same
   @AppStorage("customOutputFolder") var defaultCustomOutputFolder = ""
   @AppStorage("removeFileAfterCompress") var defaultRemoveFileAfterCompress = false
@@ -63,12 +67,21 @@ class DropZoneManager: ObservableObject {
     }
   }
 
-  var imageDimension: ImageDimension {
+  var imageSize: ImageSize {
     switch dropZoneCompressionSettingsType {
     case .same:
-      return defaultImageDimension
+      return defaultImageSize
     case .custom:
-      return dropZoneImageDimension
+      return dropZoneImageSize
+    }
+  }
+
+  var imageSizeValue: Int {
+    switch dropZoneCompressionSettingsType {
+    case .same:
+      return defaultImageSizeValue
+    case .custom:
+      return dropZoneImageSizeValue
     }
   }
 
@@ -150,6 +163,15 @@ class DropZoneManager: ObservableObject {
       return defaultRemoveFileAfterCompress
     case .custom:
       return dropZoneRemoveFileAfterCompression
+    }
+  }
+
+  var pdfQuality: PDFQuality {
+    switch dropZoneCompressionSettingsType {
+    case .same:
+      return defaultPdfQuality
+    case .custom:
+      return dropZonePdfQuality
     }
   }
 
@@ -247,13 +269,16 @@ class DropZoneManager: ObservableObject {
           return .image(
             imageQuality: imageQuality,
             imageFormat: imageFormat,
-            imageDimension: imageDimension
+            imageSize: imageSize,
+            imageSizeValue: imageSizeValue
           )
         case .gif:
           return .gifCompress(
             gifQuality: gifQuality,
             dimension: gifDimension
           )
+        case .pdf:
+          return .pdfCompress(pdfQuality: pdfQuality)
         case .video:
           return .video(
             videoQuality: videoQuality,
@@ -334,13 +359,6 @@ class DropZoneManager: ObservableObject {
     let midY = (NSScreen.main?.frame.height ?? 0) / 2 + (NSScreen.main?.frame.origin.y ?? 0)
     offsetX = offsetXMax * ((mouseLocation.x - centerPoint.x) / centerPoint.x)
     offsetY = offsetYMax * ((mouseLocation.y - midY) / midY)
-//    if let window = notchWindow {
-//      var frame = notchFrame
-//      frame.origin.x += offsetX
-//      frame.origin.y += offsetY
-//      window.setFrameOrigin(frame.origin)
-//    }
-//    print("💛", mouseLocation, offsetX)
   }
 
   private func checkForDraggedItems() {

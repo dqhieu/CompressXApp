@@ -33,6 +33,10 @@
 		4738044C2C625B9300426C99 /* VisualEffectView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4738044B2C625B9300426C99 /* VisualEffectView.swift */; };
 		473804502C625C1700426C99 /* FileDownloader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4738044F2C625C1700426C99 /* FileDownloader.swift */; };
 		473804522C625CA700426C99 /* InstallationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 473804512C625CA400426C99 /* InstallationView.swift */; };
+		473FEC2C2D63851200DFB757 /* SingleImagePreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 473FEC2B2D63851200DFB757 /* SingleImagePreviewView.swift */; };
+		473FEC2E2D63852C00DFB757 /* SingleFilePreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 473FEC2D2D63852500DFB757 /* SingleFilePreviewView.swift */; };
+		473FEC302D63893400DFB757 /* SingleGifPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 473FEC2F2D63892A00DFB757 /* SingleGifPreviewView.swift */; };
+		473FEC322D638A1400DFB757 /* SinglePDFPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 473FEC312D638A0E00DFB757 /* SinglePDFPreviewView.swift */; };
 		4746E1BF2B19D00D00C862F4 /* AVKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4746E1BA2B19CFE500C862F4 /* AVKit.framework */; };
 		4746E1C22B19D7B300C862F4 /* SwiftDate in Frameworks */ = {isa = PBXBuildFile; productRef = 4746E1C12B19D7B300C862F4 /* SwiftDate */; };
 		47484B2C2B49A8700089AEFA /* LicenseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47484B2B2B49A86F0089AEFA /* LicenseManager.swift */; };
@@ -133,6 +137,10 @@
 		4738044B2C625B9300426C99 /* VisualEffectView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisualEffectView.swift; sourceTree = "<group>"; };
 		4738044F2C625C1700426C99 /* FileDownloader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileDownloader.swift; sourceTree = "<group>"; };
 		473804512C625CA400426C99 /* InstallationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstallationView.swift; sourceTree = "<group>"; };
+		473FEC2B2D63851200DFB757 /* SingleImagePreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SingleImagePreviewView.swift; sourceTree = "<group>"; };
+		473FEC2D2D63852500DFB757 /* SingleFilePreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SingleFilePreviewView.swift; sourceTree = "<group>"; };
+		473FEC2F2D63892A00DFB757 /* SingleGifPreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SingleGifPreviewView.swift; sourceTree = "<group>"; };
+		473FEC312D638A0E00DFB757 /* SinglePDFPreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SinglePDFPreviewView.swift; sourceTree = "<group>"; };
 		4746E1BA2B19CFE500C862F4 /* AVKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVKit.framework; path = System/Library/Frameworks/AVKit.framework; sourceTree = SDKROOT; };
 		47484B2B2B49A86F0089AEFA /* LicenseManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LicenseManager.swift; sourceTree = "<group>"; };
 		474DA44D2CC92C4400344130 /* ImagePreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImagePreviewView.swift; sourceTree = "<group>"; };
@@ -144,7 +152,7 @@
 		4767A4382D39FCA00015C413 /* PlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerView.swift; sourceTree = "<group>"; };
 		4771A42A2B4D9B9600768E81 /* Utils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utils.swift; sourceTree = "<group>"; };
 		47725F4C2BCCE6E600F6487E /* WebPCoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebPCoder.swift; sourceTree = "<group>"; };
-		477CACBB2B0904EF00B335E5 /* CompressX.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CompressX.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		477CACBB2B0904EF00B335E5 /* Compresto.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Compresto.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		477CACBE2B0904EF00B335E5 /* CompressXApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompressXApp.swift; sourceTree = "<group>"; };
 		477CACC22B0904F000B335E5 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		477CACC52B0904F000B335E5 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
@@ -291,7 +299,7 @@
 		477CACBC2B0904EF00B335E5 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				477CACBB2B0904EF00B335E5 /* CompressX.app */,
+				477CACBB2B0904EF00B335E5 /* Compresto.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -305,9 +313,13 @@
 				472F94C72C8854760092B4FF /* DropZone */,
 				474EF1F12C6A5F1F003A7602 /* MenuBarView.swift */,
 				47974E192CBFF5EE00EE6376 /* FileGridView.swift */,
+				473FEC2D2D63852500DFB757 /* SingleFilePreviewView.swift */,
+				473FEC312D638A0E00DFB757 /* SinglePDFPreviewView.swift */,
 				4767A4382D39FCA00015C413 /* PlayerView.swift */,
 				47A116812CCD406E005B500E /* InputFile.swift */,
 				474DA44D2CC92C4400344130 /* ImagePreviewView.swift */,
+				473FEC2B2D63851200DFB757 /* SingleImagePreviewView.swift */,
+				473FEC2F2D63892A00DFB757 /* SingleGifPreviewView.swift */,
 				474DA4EE2CC9349B00344130 /* GifPreviewView.swift */,
 				474DA4F02CC93D0300344130 /* VideoPreviewView.swift */,
 				47DB9E302D28C45300C11FA6 /* PdfPreviewView.swift */,
@@ -393,7 +405,7 @@
 				47FDC8302CA9193600922EE0 /* KeyboardShortcuts */,
 			);
 			productName = CompressX;
-			productReference = 477CACBB2B0904EF00B335E5 /* CompressX.app */;
+			productReference = 477CACBB2B0904EF00B335E5 /* Compresto.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -469,6 +481,7 @@
 				47FDC8332CA9195C00922EE0 /* KeyboardShortctuts.swift in Sources */,
 				47FA18EF2C5BBE5E008AB2C7 /* GifDimension.swift in Sources */,
 				474EF1F22C6A5F21003A7602 /* MenuBarView.swift in Sources */,
+				473FEC322D638A1400DFB757 /* SinglePDFPreviewView.swift in Sources */,
 				474DA4F12CC93D0500344130 /* VideoPreviewView.swift in Sources */,
 				47DB9E332D28C9F300C11FA6 /* PDFCompressionSettings.swift in Sources */,
 				474DA44E2CC92C4700344130 /* ImagePreviewView.swift in Sources */,
@@ -480,6 +493,7 @@
 				47484B2C2B49A8700089AEFA /* LicenseManager.swift in Sources */,
 				47A90D5A2D170EBB00DB5262 /* CreditsSettingsView.swift in Sources */,
 				478FCFA82D170903004AE78A /* MonitoringSettingsView.swift in Sources */,
+				473FEC2C2D63851200DFB757 /* SingleImagePreviewView.swift in Sources */,
 				47FA18DF2C5BBE1D008AB2C7 /* ImageType.swift in Sources */,
 				47A2BADE2D166E3200BECD54 /* SettingsV2View.swift in Sources */,
 				470973852B71E43900BCFD05 /* Watcher.swift in Sources */,
@@ -493,6 +507,7 @@
 				4738044A2C625A9C00426C99 /* OnboardingStepView.swift in Sources */,
 				47FA18E52C5BBE3D008AB2C7 /* ImageQuality.swift in Sources */,
 				472F94C92C8854850092B4FF /* DropZoneView.swift in Sources */,
+				473FEC302D63893400DFB757 /* SingleGifPreviewView.swift in Sources */,
 				475A52CA2D1699AD00A18CF4 /* AppearanceSettingsV2View.swift in Sources */,
 				47DB9E272D2826FA00C11FA6 /* VideoOptionsView.swift in Sources */,
 				4771A42B2B4D9B9600768E81 /* Utils.swift in Sources */,
@@ -525,6 +540,7 @@
 				470DE8BB2D3FCA5400A3CC4C /* OutputView.swift in Sources */,
 				472F94CB2C8854DB0092B4FF /* DropZoneManager.swift in Sources */,
 				471EC8C82C775C7E00A77B6C /* UpdateDependenciesView.swift in Sources */,
+				473FEC2E2D63852C00DFB757 /* SingleFilePreviewView.swift in Sources */,
 				47DB9E2F2D282B4400C11FA6 /* PdfOptionsView.swift in Sources */,
 				4782E8C02B20AACF00482D73 /* OpenWithHandler.swift in Sources */,
 			);
@@ -661,7 +677,7 @@
 				CODE_SIGN_ENTITLEMENTS = CompressX/CompressX.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 144;
+				CURRENT_PROJECT_VERSION = 160;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"CompressX/Preview Content\"";
 				DEVELOPMENT_TEAM = BH46VD9229;
@@ -669,7 +685,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = CompressX/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = CompressX;
+				INFOPLIST_KEY_CFBundleDisplayName = Compresto;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -677,9 +693,9 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 1.18;
+				MARKETING_VERSION = 1.19;
 				PRODUCT_BUNDLE_IDENTIFIER = com.hieudinh.CompressX;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = Compresto;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 			};
@@ -693,7 +709,7 @@
 				CODE_SIGN_ENTITLEMENTS = CompressX/CompressX.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 144;
+				CURRENT_PROJECT_VERSION = 160;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"CompressX/Preview Content\"";
 				DEVELOPMENT_TEAM = BH46VD9229;
@@ -701,7 +717,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = CompressX/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = CompressX;
+				INFOPLIST_KEY_CFBundleDisplayName = Compresto;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -709,9 +725,9 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 1.18;
+				MARKETING_VERSION = 1.19;
 				PRODUCT_BUNDLE_IDENTIFIER = com.hieudinh.CompressX;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = Compresto;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 			};

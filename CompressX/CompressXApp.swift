@@ -21,6 +21,7 @@ let telemetryConfiguration = TelemetryManagerConfiguration(appID: "")
 struct CompressXApp: App {
 
   @Environment(\.openWindow) var openWindow
+  @Environment(\.colorScheme) var colorScheme
 
   @FocusState private var isFocused: Bool
 
@@ -30,6 +31,7 @@ struct CompressXApp: App {
   @AppStorage("selectedAppIconName") var selectedAppIconName = "AppIcon"
   @AppStorage("pinMainWindowOnTop") var pinMainWindowOnTop = false
   @AppStorage("automaticallyChecksForUpdates") var automaticallyChecksForUpdates = true
+  @AppStorage("menuBarIconStyle") var menuBarIconStyle: MenuBarIconStyle = .sameAsDock
 
   @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
   
@@ -54,7 +56,7 @@ struct CompressXApp: App {
   }
 
   var body: some Scene {
-    Window("CompressX", id: "mainWindow") {
+    Window("Compresto", id: "mainWindow") {
       if shouldShowOnboardingV2 {
         OnboardingView()
           .environmentObject(installationManager)
@@ -100,7 +102,7 @@ struct CompressXApp: App {
     .commands {
       CommandGroup(replacing: .newItem, addition: { })
       CommandGroup(replacing: .appInfo) {
-        Button("About CompressX") {
+        Button("About Compresto") {
           NSApplication.shared.orderFrontStandardAboutPanel(
             options: [
               NSApplication.AboutPanelOptionKey(rawValue: "Copyright"): "© 2024 Dinh Quang Hieu"
@@ -124,17 +126,17 @@ struct CompressXApp: App {
         }
       }
       CommandGroup(replacing: .help) {
-        Link(destination: URL(string: "https://docs.compressx.app")!) {
+        Link(destination: URL(string: "https://docs.compresto.app")!) {
           Text("📘 Documentation")
         }
-        Link(destination: URL(string: "https://compressx.app/changelog")!) {
+        Link(destination: URL(string: "https://compresto.app/changelog")!) {
           Text("📝 Changelog")
         }
         Link(destination: URL(string: "https://t.me/+ldb3DRPCi6Y1NWNl")!) {
           Text("💬 Join Telegram community")
         }
-        Link(destination: URL(string: "mailto:hieu@compressx.app")!) {
-          Text("💌 Email hieu@compressx.app")
+        Link(destination: URL(string: "mailto:hieu@compresto.app")!) {
+          Text("💌 Email hieu@compresto.app")
         }
       }
     }
@@ -163,13 +165,21 @@ struct CompressXApp: App {
     MenuBarExtra(isInserted: $showMenuBarIcon) {
       MenuBarView()
     } label: {
+      let imageName: String = {
+        switch menuBarIconStyle {
+        case .sameAsDock:
+          return selectedAppIconName + "_menubar"
+        case .simple:
+          return "SimpleMenuBarIcon"
+        }
+      }()
       let image: NSImage = {
         let ratio = $0.size.height / $0.size.width
         $0.size.height = 18
         $0.size.width = 18 / ratio
         return $0
-      }(NSImage(named: selectedAppIconName + "_menubar")!)
-      Image(nsImage: image)
+      }(NSImage(named: imageName)!)
+      return Image(nsImage: image)
     }
     .menuBarExtraStyle(.menu)
     .onChange(of: keyboardShortcutsManager.mainWindowTrigger, perform: { _ in
@@ -286,7 +296,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, UNUserNoti
   }
   
   func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
-    if !flag, let window = sender.windows.first(where: { $0.title == "CompressX" }) {
+    if !flag, let window = sender.windows.first(where: { $0.title == "Compresto" }) {
       window.makeKeyAndOrderFront(self)
     }
     if showDockIcon {
@@ -310,7 +320,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, UNUserNoti
   }
   
   func windowShouldClose(_ sender: NSWindow) -> Bool {
-    if sender.title == "CompressX", JobManager.shared.isRunning {
+    if sender.title == "Compresto", JobManager.shared.isRunning {
       let alert = NSAlert.init()
       alert.addButton(withTitle: "Don't close")
       alert.addButton(withTitle: "Close anyway")
@@ -328,9 +338,19 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, UNUserNoti
     }
     return true
   }
-  
+
   func application(_ application: NSApplication, open urls: [URL]) {
+    if showDockIcon {
+      NSApp.hide(nil)
+    } else {
+      NSApp.setActivationPolicy(.accessory)
+    }
     DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+      NSApp.windows.forEach {
+        if $0.title == "Compresto" {
+          $0.orderOut(nil)
+        }
+      }
       let jobs = urls.flatMap { DeeplinkParser.shared.parse(url: $0) }
       if !jobs.isEmpty {
         Watcher.shared.addJobs(jobs)

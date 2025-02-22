@@ -13,20 +13,24 @@ class WebPCoder {
 
   static let shared = WebPCoder()
 
-  func convert(inputURL: URL, outputURL: URL, imageQuality: ImageQuality, imageDimension: ImageDimension) -> String? {
+  func convert(inputURL: URL, outputURL: URL, imageQuality: ImageQuality, imageSize: ImageSize, imageSizeValue: Int) -> String? {
     guard var image = NSImage(contentsOf: inputURL) else {
       return "Failed to load image"
     }
     let newSize: CGSize = {
       if let imageRep = NSImageRep(contentsOf: inputURL), imageRep.pixelsWide > 0, imageRep.pixelsHigh > 0 {
-        return CGSize(
-          width: Double(imageRep.pixelsWide) * imageDimension.fraction,
-          height: Double(imageRep.pixelsHigh) * imageDimension.fraction
+        return getSize(
+          inputWidth: CGFloat(imageRep.pixelsWide),
+          inputHeight: CGFloat(imageRep.pixelsHigh),
+          imageSize: imageSize,
+          imageSizeValue: imageSizeValue
         )
       }
-      return CGSize(
-        width: image.size.width * image.scale * imageDimension.fraction,
-        height: image.size.height * image.scale * imageDimension.fraction
+      return getSize(
+        inputWidth: image.size.width * image.scale,
+        inputHeight: image.size.width * image.scale,
+        imageSize: imageSize,
+        imageSizeValue: imageSizeValue
       )
     }()
     image = image.resized(to: newSize)

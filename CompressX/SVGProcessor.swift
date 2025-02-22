@@ -10,20 +10,24 @@ import AppKit
 import SwiftDraw
 
 class SVGProcessor {
-  static func convert(job: Job, imageQuality: ImageQuality, imageFormat: ImageFormat, imageDimension: ImageDimension) -> String? {
+  static func convert(job: Job, imageQuality: ImageQuality, imageFormat: ImageFormat, imageSize: ImageSize, imageSizeValue: Int) -> String? {
     guard let svg = SVG(fileURL: job.inputFileURL) else {
       return "Failed to initialize SVG"
     }
-    let newSize: CGSize? = {
+    let newSize: CGSize = {
       if let imageRep = NSImageRep(contentsOf: job.inputFileURL), imageRep.pixelsWide > 0, imageRep.pixelsHigh > 0 {
-        return CGSize(
-          width: Double(imageRep.pixelsWide) * imageDimension.fraction,
-          height: Double(imageRep.pixelsHigh) * imageDimension.fraction
+        return getSize(
+          inputWidth: CGFloat(imageRep.pixelsWide),
+          inputHeight: CGFloat(imageRep.pixelsHigh),
+          imageSize: imageSize,
+          imageSizeValue: imageSizeValue
         )
       }
-      return CGSize(
-        width: svg.size.width * imageDimension.fraction,
-        height: svg.size.height * imageDimension.fraction
+      return getSize(
+        inputWidth: CGFloat(svg.size.width),
+        inputHeight: CGFloat(svg.size.height),
+        imageSize: imageSize,
+        imageSizeValue: imageSizeValue
       )
     }()
     switch imageFormat {

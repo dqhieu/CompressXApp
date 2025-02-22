@@ -16,7 +16,8 @@ struct DropZoneView: View {
 
   @State private var scale = 0.5
   @State private var offset = DropZoneManager.HEIGHT
-  @State private var alpha = 1.0
+  @State private var alpha = 0.0
+  @State private var blur = 20.0
 
   @State var leftMouseReleaseMonitor: Any?
 
@@ -37,6 +38,8 @@ struct DropZoneView: View {
               .foregroundStyle(.white)
               .lineLimit(1)
               .offset(x: dropZoneManager.offsetX, y: -dropZoneManager.offsetY)
+              .opacity(alpha)
+              .blur(radius: blur)
             Spacer(minLength: 0)
           }
           .background(.black)
@@ -87,7 +90,10 @@ struct DropZoneView: View {
     withAnimation(.spring()) {
       scale = 1.0
       offset = 0
+    }
+    withAnimation(.spring().delay(0.1)) {
       alpha = 1.0
+      blur = 0.0
     }
 
     leftMouseReleaseMonitor = NSEvent.addGlobalMonitorForEvents(matching: .leftMouseUp) { _ in
@@ -109,6 +115,7 @@ struct DropZoneView: View {
         offset = DropZoneManager.HEIGHT
       }
       alpha = 0.0
+      blur = 20
     }
     DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
       onClose()

@@ -91,12 +91,12 @@ struct UpdateSettingsV2View: View {
             alert.messageText = "You're using the latest available version for your license. To continue getting updates, please purchase a new license or renew your current license"
             let response = alert.runModal()
             if response == NSApplication.ModalResponse.alertFirstButtonReturn {
-              NSWorkspace.shared.open(URL(string: "https://compressx.app/pricing")!)
+              NSWorkspace.shared.open(URL(string: "https://compresto.app/pricing")!)
             }
             if response == NSApplication.ModalResponse.alertSecondButtonReturn {
               let licenseKey = LicenseManager.shared.licenseKey
               let productID = LicenseManager.shared.productID
-              let url = "https://compressx.app/license-renew?license-key=\(licenseKey)&product-id=\(productID)"
+              let url = "https://compresto.app/license-renew?license-key=\(licenseKey)&product-id=\(productID)"
               NSWorkspace.shared.open(URL(string: url)!)
             }
           case -1:
@@ -109,7 +109,7 @@ struct UpdateSettingsV2View: View {
               if let url = model.downloadURL {
                 NSWorkspace.shared.open(URL(string: url)!)
               } else {
-                NSWorkspace.shared.open(URL(string: "https://compressx.app/download")!)
+                NSWorkspace.shared.open(URL(string: "https://compresto.app/download")!)
               }
             }
           default: break

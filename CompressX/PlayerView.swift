@@ -5,7 +5,6 @@
 //  Created by Dinh Quang Hieu on 1/17/25.
 //
 
-
 import SwiftUI
 import AVKit
 
@@ -27,6 +26,17 @@ struct SingleVideoPlayerView: View {
       if !wrapper.isTrimming {
         VStack {
           HStack {
+            Text("\(file.fileExtension) | \(file.fileSize)")
+              .padding(6)
+              .background(isHovering ? .regularMaterial : .thinMaterial)
+              .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+              .overlay(
+                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                  .strokeBorder(
+                    colorScheme == .dark ? .white.opacity(0.3) : .black.opacity(0.1),
+                    lineWidth: 1
+                  )
+              )
             Button {
               Task {
                 await wrapper.beginTrim()
@@ -45,11 +55,27 @@ struct SingleVideoPlayerView: View {
                 )
             }
             .buttonStyle(.borderless)
-            .padding(8)
             Spacer()
           }
           Spacer()
+          HStack {
+            Text("\(file.fileName)")
+              .lineLimit(1)
+              .padding(6)
+              .background(isHovering ? .regularMaterial : .thinMaterial)
+              .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+              .overlay(
+                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                  .strokeBorder(
+                    colorScheme == .dark ? .white.opacity(0.3) : .black.opacity(0.1),
+                    lineWidth: 1
+                  )
+              )
+              .padding(.bottom, isHovering ? 34 : 0)
+            Spacer()
+          }
         }
+        .padding(8)
       }
     }
     .onHover(perform: { hover in
@@ -59,15 +85,18 @@ struct SingleVideoPlayerView: View {
       reloadPlayer(file: file)
     }
     .onChange(of: file, perform: { newValue in
+      wrapper.playerView.player?.pause()
       reloadPlayer(file: newValue)
     })
+    .onDisappear {
+      wrapper.playerView.player?.pause()
+    }
   }
 
   func reloadPlayer(file: InputFile) {
     player = AVPlayer(url: file.url)
     if let player = player {
       wrapper.reload(player: player, startTime: startTimes[file.url], endTime: endTimes[file.url])
-//      player.play()
     }
     wrapper.onTrimConfirmed = { (start, end) -> Void in
       startTimes[file.url] = start

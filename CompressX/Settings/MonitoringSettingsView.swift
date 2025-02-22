@@ -39,7 +39,8 @@ class WatchSetting: Identifiable, Codable {
   var customOutputFolder: String = ""
   var removeFileAfterCompression: Bool? = false
   var videoDimension: VideoDimension? = .same
-  var imageDimension: ImageDimension? = .same
+  var imageSize: ImageSize? = .same
+  var imageSizeValue: Int? = 100
   var outputFileNameFormat: String? = ""
 }
 
@@ -58,9 +59,10 @@ struct WatchSettingView: View {
   @State private var customOutputFolder: String = ""
   @State private var removeFileAfterCompression = false
   @State private var videoDimension: VideoDimension = .same
-  @State private var imageDimension: ImageDimension = .same
+  @State private var imageSize: ImageSize = .same
   @State private var outputFileNameFormat: String = ""
   @State private var showOutputFileNameFormatPopover = false
+  @State private var imageSizeValueText = "100"
 
   var body: some View {
     Form {
@@ -138,16 +140,44 @@ struct WatchSettingView: View {
             setting.imageFormat = newValue
             updateSetting()
           })
-          Picker("Image size", selection: $imageDimension) {
-            ForEach(ImageDimension.allCases, id: \.self) { dimension in
-              Text(dimension.displayText).tag(dimension.rawValue)
+          VStack {
+            Picker("Image size", selection: $imageSize) {
+              ForEach(ImageSize.allCases, id: \.self) { size in
+                Text(size.displayText).tag(size.rawValue)
+              }
+            }
+            .pickerStyle(.menu)
+            .onChange(of: imageSize, perform: { newValue in
+              setting.imageSize = newValue
+              updateSetting()
+            })
+            if imageSize != .same {
+              HStack {
+                TextField("Value", text: $imageSizeValueText, onEditingChanged: { (editingChanged) in
+                  if !editingChanged {
+                    onSubmittion()
+                  }
+                })
+                .frame(width: 100)
+                .textFieldStyle(.squareBorder)
+                .labelsHidden()
+                .multilineTextAlignment(.trailing)
+                .onSubmit(onSubmittion)
+                .task {
+                  imageSizeValueText = String(setting.imageSizeValue ?? 100)
+                }
+                Text(imageSize == .percentage ? "%" : "px")
+                  .foregroundStyle(.secondary)
+                Spacer()
+                Button {
+                  onSubmittion()
+                } label: {
+                  Text("Update")
+                }
+                .disabled(setting.imageSizeValue == Int(imageSizeValueText))
+              }
             }
           }
-          .pickerStyle(.menu)
-          .onChange(of: imageDimension, perform: { newValue in
-            setting.imageDimension = newValue
-            updateSetting()
-          })
         }
       }
       Section {
@@ -228,7 +258,7 @@ struct WatchSettingView: View {
       customOutputFolder = setting.customOutputFolder
       removeFileAfterCompression = setting.removeFileAfterCompression ?? false
       videoDimension = setting.videoDimension ?? .same
-      imageDimension = setting.imageDimension ?? .same
+      imageSize = setting.imageSize ?? .same
       outputFileNameFormat = setting.outputFileNameFormat ?? ""
     }
   }
@@ -236,16 +266,18 @@ struct WatchSettingView: View {
   var formHeight: CGFloat {
     switch fileType {
     case .image:
+      if imageSize != .same {
+        return 380
+      }
       return 350
     case .video:
       return 390
     case .all:
+      if imageSize != .same {
+        return 540
+      }
       return 510
     }
-  }
-
-  var extraHeight: CGFloat {
-    return outputFolder == .same ? 0 : 20
   }
 
   func openFolderSelectionPanel() {
@@ -267,6 +299,23 @@ struct WatchSettingView: View {
   func updateSetting() {
     guard let index = watchSettings.firstIndex(where: { $0.id == setting.id }) else { return }
     watchSettings[index] = setting
+  }
+
+  func onSubmittion() {
+    if let value = Int(imageSizeValueText), value > 0 && value <= 65535 {
+      setting.imageSizeValue = value
+      updateSetting()
+    } else {
+      let alert = NSAlert()
+      alert.messageText = "Invalid value"
+      if (Int(imageSizeValueText) ?? 0) <= 0 {
+        alert.informativeText = "Value must be an positive integer"
+      } else if (Int(imageSizeValueText) ?? 0) > 65535 {
+        alert.informativeText = "Value is too large"
+      }
+      alert.addButton(withTitle: "OK")
+      let _ = alert.runModal()
+    }
   }
 }
 

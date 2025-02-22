@@ -64,7 +64,7 @@ struct PDFCompressionSettingsView: View {
           VStack {
             Button {
               path = "123"
-              NSWorkspace.shared.open(URL(string: "https://docs.compressx.app/guides/how-to-setup-pdf-compression")!)
+              NSWorkspace.shared.open(URL(string: "https://docs.compresto.app/guides/how-to-setup-pdf-compression")!)
             } label: {
               Text("Read the docs")
             }
@@ -89,7 +89,7 @@ struct PDFCompressionSettingsView: View {
         }
       }
       Section {
-        Text("**Disclaimer**: CompressX does not own or distribute Ghostscript (https://www.ghostscript.com/). Ghostscript is installed separately on your device. CompressX only uses Ghostscript to compress PDF files.")
+        Text("**Disclaimer**: Compresto does not own or distribute Ghostscript (https://www.ghostscript.com/). Ghostscript is installed separately on your device. Compresto only uses Ghostscript to compress PDF files.")
           .frame(maxWidth: .infinity, alignment: .leading)
       }
     }

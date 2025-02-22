@@ -67,7 +67,7 @@ struct LicenseSettingsV2View: View {
                 Button {
                   let licenseKey = licenseManager.licenseKey
                   let productID = licenseManager.productID
-                  let url = "https://compressx.app/license-renew?license-key=\(licenseKey)&product-id=\(productID)"
+                  let url = "https://compresto.app/license-renew?license-key=\(licenseKey)&product-id=\(productID)"
                   NSWorkspace.shared.open(URL(string: url)!)
                 } label: {
                   Text("Renew license")
@@ -119,7 +119,7 @@ struct LicenseSettingsV2View: View {
           Spacer()
           if licenseManager.isSubscription {
             Button {
-              NSWorkspace.shared.open(URL(string: "https://compressx.lemonsqueezy.com/billing")!)
+              NSWorkspace.shared.open(URL(string: "https://compresto.lemonsqueezy.com/billing")!)
             } label: {
               Text("Manage billing")
             }
@@ -144,7 +144,7 @@ struct LicenseSettingsV2View: View {
           HStack {
             Text("Enter your license key")
             Spacer()
-            Link(destination: URL(string: "https://docs.compressx.app/guides/how-to-find-your-license-key")!, label: {
+            Link(destination: URL(string: "https://docs.compresto.app/guides/how-to-find-your-license-key")!, label: {
               Text("How to find license key \(Image(systemName: "questionmark.circle"))")
             })
           }

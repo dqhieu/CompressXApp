@@ -20,6 +20,7 @@ class HUDJobManager: ObservableObject {
   @AppStorage("retainImageMetadata") var retainImageMetadata = false
   @AppStorage("copyOutputFilesToClipboard") var copyCompressedFilesToClipboard = false
   @AppStorage("confettiEnabled") var confettiEnabled = false
+  @AppStorage("notifyWhenFinish") var notifyWhenFinish = false
 
   static let shared = HUDJobManager()
 
@@ -30,12 +31,13 @@ class HUDJobManager: ObservableObject {
     guard FileManager.default.fileExists(atPath: job.inputFileURL.path(percentEncoded: false)) else {
       return "Input file does not exist"
     }
-    if case .image(let imageQuality, let imageFormat, let imageDimension) = job.outputType, imageFormat == .webp {
+    if case .image(let imageQuality, let imageFormat, let imageSize, let imageSizeValue) = job.outputType, imageFormat == .webp {
       return WebPCoder.shared.convert(
         inputURL: job.inputFileURL,
         outputURL: job.outputFileURL,
         imageQuality: imageQuality,
-        imageDimension: imageDimension
+        imageSize: imageSize,
+        imageSizeValue: imageSizeValue
       )
     }
     let (process, pathError) = await JobManager.shared.createTask(job: job)
@@ -178,10 +180,23 @@ class HUDJobManager: ObservableObject {
       if confettiEnabled, successCount > 0, let url = URL(string: "raycast://confetti") {
         NSWorkspace.shared.open(url)
       }
+      sendPushNotificationIfNeeded()
     }
 
     NoSleep.enableSleep()
     return self.jobs
+  }
+
+  func sendPushNotificationIfNeeded() {
+    let successCount = jobs.map { FileManager.default.fileExists(atPath: $0.outputFileURL.path(percentEncoded: false)) ? 1 : 0 }.reduce(0,+)
+    if notifyWhenFinish {
+      if successCount > 0, let job = jobs.first {
+        let path = job.outputFileURL.deletingLastPathComponent().path(percentEncoded: false)
+        sendSuccessPushNotification(path: path, count: successCount, urls: jobs.map { $0.outputFileURL.absoluteString })
+      } else if let error = jobs.first(where: { $0.error != nil })?.error {
+        sendErrorPushNotification(error: error)
+      }
+    }
   }
 
   func terminate() {

@@ -14,9 +14,9 @@ struct AboutSettingsView: View {
       HStack {
         Text("Website")
         Spacer()
-        Link(destination: URL(string: "https://compressx.app")!) {
+        Link(destination: URL(string: "https://compresto.app")!) {
           HStack {
-            Text("compressx.app")
+            Text("compresto.app")
             Image(systemName: "arrow.up.right.square")
           }
         }
@@ -24,9 +24,9 @@ struct AboutSettingsView: View {
       HStack {
         Text("Changelog")
         Spacer()
-        Link(destination: URL(string: "https://compressx.app/changelog")!) {
+        Link(destination: URL(string: "https://compresto.app/changelog")!) {
           HStack {
-            Text("compressx.app/changelog")
+            Text("compresto.app/changelog")
             Image(systemName: "arrow.up.right.square")
           }
         }
@@ -34,9 +34,9 @@ struct AboutSettingsView: View {
       HStack {
         Text("Documentation")
         Spacer()
-        Link(destination: URL(string: "https://docs.compressx.app")!) {
+        Link(destination: URL(string: "https://docs.compresto.app")!) {
           HStack {
-            Text("docs.compressx.app")
+            Text("docs.compresto.app")
             Image(systemName: "arrow.up.right.square")
           }
         }
@@ -44,9 +44,9 @@ struct AboutSettingsView: View {
       HStack {
         Text("Support email")
         Spacer()
-        Link(destination: URL(string: "mailto:hieu@compressx.app")!) {
+        Link(destination: URL(string: "mailto:hieu@compresto.app")!) {
           HStack {
-            Text("hieu@compressx.app")
+            Text("hieu@compresto.app")
             Image(systemName: "arrow.up.right.square")
           }
         }
@@ -54,9 +54,9 @@ struct AboutSettingsView: View {
       HStack {
         Text("𝕏")
         Spacer()
-        Link(destination: URL(string: "https://x.com/CompressXApp")!) {
+        Link(destination: URL(string: "https://x.com/ComprestoApp")!) {
           HStack {
-            Text("x.com/CompressXApp")
+            Text("x.com/ComprestoApp")
             Image(systemName: "arrow.up.right.square")
           }
         }
@@ -74,9 +74,9 @@ struct AboutSettingsView: View {
       HStack {
         Text("Github")
         Spacer()
-        Link(destination: URL(string: "https://github.com/dqhieu/CompressXApp")!) {
+        Link(destination: URL(string: "https://github.com/dqhieu/ComprestoApp")!) {
           HStack {
-            Text("github.com/dqhieu/CompressXApp")
+            Text("github.com/dqhieu/ComprestoApp")
             Image(systemName: "arrow.up.right.square")
           }
         }

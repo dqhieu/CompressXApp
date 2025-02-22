@@ -58,7 +58,7 @@ struct OnboardingView: View {
               .frame(width: 80, height: 80, alignment: .center)
           }
           Text("Well done! You have finished the onboarding 🚀")
-          Text("Learn more about CompressX features in our comprehensive [documentation](https://docs.compressx.app)")
+          Text("Learn more about Compresto features in our comprehensive [documentation](https://docs.compresto.app)")
           Button {
             shouldShowOnboardingV2 = false
           } label: {

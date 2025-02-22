@@ -9,6 +9,7 @@ import Foundation
 import UniformTypeIdentifiers
 import AVFoundation
 import AppKit
+import UserNotifications
 
 let videoSupportedTypes = [UTType.mpeg4Movie, .movie, .quickTimeMovie, .avi, .mpeg, .mpeg2Video, .video, UTType("org.matroska.mkv")].compactMap { $0 }
 let imageSupportedTypes = [UTType.image, .bmp, .jpeg]
@@ -153,11 +154,6 @@ let fileByteCountFormatter: ByteCountFormatter = {
   return bcf
 }()
 
-func filesInFolder(url: URL) -> [URL] {
-  let items: [String] = (try? FileManager.default.contentsOfDirectory(atPath: url.path(percentEncoded: false))) ?? []
-  return items.compactMap { URL(fileURLWithPath: url.path(percentEncoded: false) + $0) }
-}
-
 var brewPath: String? {
   if FileManager.default.fileExists(atPath: "/opt/homebrew/bin/brew") {
     return "/opt/homebrew/bin/brew"
@@ -238,19 +234,75 @@ func getFFmpegParam(videoSize: CGSize, expectedDimension: VideoDimension) -> [St
   }
 }
 
-func getFFmpegParam(imageSize: NSSize, dimension: ImageDimension) -> [String]? {
-  switch dimension {
+func getFFmpegParam(size: NSSize, imageSize: ImageSize, imageSizeValue: Int) -> [String]? {
+  let newSize = getSize(
+    inputWidth: size.width,
+    inputHeight: size.height,
+    imageSize: imageSize,
+    imageSizeValue: imageSizeValue
+  )
+  return ["-vf", "scale=\(newSize.width):\(newSize.height)"]
+}
+
+func getSize(inputWidth: CGFloat, inputHeight: CGFloat, imageSize: ImageSize, imageSizeValue: Int) -> CGSize {
+  switch imageSize {
   case .same:
-    return nil
-  case .threeQuarters:
-    let width = Int(imageSize.width * 3 / 4)
-    return ["-vf", "scale=\(width):-2"]
-  case .half:
-    let width = Int(imageSize.width * 1/2)
-    return ["-vf", "scale=\(width):-2"]
-  case .oneQuarter:
-    let width = Int(imageSize.width * 1/4)
-    return ["-vf", "scale=\(width):-2"]
+    return CGSize(width: inputWidth, height: inputHeight)
+  case .percentage:
+    return CGSize(
+      width: inputWidth * CGFloat(imageSizeValue) / 100,
+      height: inputHeight * CGFloat(imageSizeValue) / 100
+    )
+  case .maxHeight:
+    if inputHeight <= CGFloat(imageSizeValue) {
+      return CGSize(width: inputWidth, height: inputHeight)
+    } else {
+      return CGSize(
+        width: inputWidth * CGFloat(imageSizeValue) / inputHeight,
+        height: CGFloat(imageSizeValue)
+      )
+    }
+  case .maxWidth:
+    if inputWidth <= CGFloat(imageSizeValue) {
+      return CGSize(width: inputWidth, height: inputHeight)
+    } else {
+      return CGSize(
+        width: CGFloat(imageSizeValue),
+        height: inputHeight * CGFloat(imageSizeValue) / inputWidth
+      )
+    }
+  case .maxLongEdge:
+    if inputWidth < inputHeight {
+      return getSize(
+        inputWidth: inputWidth,
+        inputHeight: inputHeight,
+        imageSize: .maxHeight,
+        imageSizeValue: imageSizeValue
+      )
+    } else {
+      return getSize(
+        inputWidth: inputWidth,
+        inputHeight: inputHeight,
+        imageSize: .maxWidth,
+        imageSizeValue: imageSizeValue
+      )
+    }
+  case .maxShortEdge:
+    if inputWidth < inputHeight {
+      return getSize(
+        inputWidth: inputWidth,
+        inputHeight: inputHeight,
+        imageSize: .maxWidth,
+        imageSizeValue: imageSizeValue
+      )
+    } else {
+      return getSize(
+        inputWidth: inputWidth,
+        inputHeight: inputHeight,
+        imageSize: .maxHeight,
+        imageSizeValue: imageSizeValue
+      )
+    }
   }
 }
 
@@ -490,11 +542,41 @@ func getVideoThumbnail(url: URL, cmTime: CMTime?) -> NSImage? {
   return nil
 }
 
-func flattenFolder(urls: [URL]) -> [URL] {
-  let files = urls.filter { !((try? $0.resourceValues(forKeys: [.isDirectoryKey]))?.isDirectory == true) }
-  let folders = urls.filter { ((try? $0.resourceValues(forKeys: [.isDirectoryKey]))?.isDirectory == true) }
-  let flattenFiles = folders.flatMap { filesInFolder(url: $0) }
-  return files + flattenFiles
+func getSubfolders(in folderURL: URL) -> [URL] {
+  let fileManager = FileManager.default
+
+  let allItems = try? fileManager.contentsOfDirectory(
+    at: folderURL,
+    includingPropertiesForKeys: nil,
+    options: [.skipsHiddenFiles]
+  )
+
+  let subfolders = allItems?.filter { $0.hasDirectoryPath }
+
+  return subfolders ?? []
+}
+
+func getFiles(in folderURL: URL) -> [URL] {
+  let fileManager = FileManager.default
+
+  let allItems = try? fileManager.contentsOfDirectory(
+    at: folderURL,
+    includingPropertiesForKeys: nil,
+    options: [.skipsHiddenFiles]
+  )
+
+  let files = allItems?.filter { !$0.hasDirectoryPath }
+
+  return files ?? []
+}
+
+func flatten(urls: [URL], maxDepth: Int) -> [URL] {
+  guard !urls.isEmpty, maxDepth > 0 else { return [] }
+  let files = urls.filter { !$0.hasDirectoryPath }
+  let folders = urls.filter { $0.hasDirectoryPath }
+  let flattenFiles = folders.flatMap { getFiles(in: $0) }
+  let subfolders = folders.flatMap { getSubfolders(in: $0) }
+  return files + flattenFiles + flatten(urls: subfolders, maxDepth: maxDepth - 1)
 }
 
 extension Date {
@@ -580,4 +662,43 @@ func numberOfAudioTracks(url: URL) async throws -> Int {
   let audioTracks = try await asset.loadTracks(withMediaType: .audio)
 
   return audioTracks.count
+}
+
+func sendSuccessPushNotification(path: String, count: Int, urls: [String]) {
+  let content = UNMutableNotificationContent()
+  content.title = "Compression finished 🎉"
+  if urls.count > 1 {
+    content.body = "\(count) files saved to \(path). Tap to open them in Finder"
+  } else {
+    content.body = "\(count) file saved to \(path). Tap to open them in Finder"
+  }
+  content.userInfo = ["fileURLs": urls]
+  content.sound = .default
+  let request = UNNotificationRequest(identifier: "compress.finish." + UUID().uuidString, content: content, trigger: nil)
+  Task {
+    try? await UNUserNotificationCenter.current().add(request)
+  }
+}
+
+func sendErrorPushNotification(error: String) {
+  let content = UNMutableNotificationContent()
+  content.title = "Compression failed ❌"
+  content.body = error
+  content.sound = .default
+  let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)
+  Task {
+    try? await UNUserNotificationCenter.current().add(request)
+  }
+}
+
+func hasSubfolders(urls: [URL]) -> Bool {
+  let folders = urls.filter { $0.hasDirectoryPath }
+  for folder in folders {
+    // check if folder has subfolders
+    let subfolders = getSubfolders(in: folder)
+    if !subfolders.isEmpty {
+      return true
+    }
+  }
+  return false
 }

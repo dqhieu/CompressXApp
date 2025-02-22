@@ -129,24 +129,22 @@ struct FileInfoOverlay: View {
         .padding(8)
         Spacer()
       }
-      if isHovering {
-        VStack {
-          Spacer()
-          Text("\(file.fileName)")
-            .lineLimit(1)
-            .padding(6)
-            .background(isHovering ? .regularMaterial : .thinMaterial)
-            .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
-            .overlay(
-              RoundedRectangle(cornerRadius: 8, style: .continuous)
-                .strokeBorder(
-                  colorScheme == .dark ? .white.opacity(0.3) : .black.opacity(0.1),
-                  lineWidth: 1
-                )
-            )
-            .padding(8)
-            .frame(maxWidth: size, alignment: .leading)
-        }
+      VStack {
+        Spacer()
+        Text("\(file.fileName)")
+          .lineLimit(1)
+          .padding(6)
+          .background(isHovering ? .regularMaterial : .thinMaterial)
+          .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+          .overlay(
+            RoundedRectangle(cornerRadius: 8, style: .continuous)
+              .strokeBorder(
+                colorScheme == .dark ? .white.opacity(0.3) : .black.opacity(0.1),
+                lineWidth: 1
+              )
+          )
+          .padding(8)
+          .frame(maxWidth: size, alignment: .leading)
       }
     }
     .opacity(isTrimming ? 0 : 1)
@@ -229,8 +227,8 @@ struct FileGridView: View {
         Text("You can change this settings anytime in Settings → File Management")
       }
       .frame(maxWidth: .infinity, maxHeight: .infinity)
-    } else if inputFiles.count == 1, let file = inputFiles.last, file.fileType == .video {
-      SingleVideoPlayerView(file: file, startTimes: $startTimes, endTimes: $endTimes)
+    } else if inputFiles.count == 1, let file = inputFiles.last {
+      SingleFilePreviewView(file: file, startTimes: $startTimes, endTimes: $endTimes)
     } else {
       GeometryReader { proxy in
         ScrollView(showsIndicators: false) {

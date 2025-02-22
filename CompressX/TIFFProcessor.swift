@@ -9,12 +9,14 @@ import Foundation
 import AppKit
 
 class TIFFProcessor {
-  static func compress(job: Job, imageQuality: ImageQuality, imageFormat: ImageFormat, imageDimension: ImageDimension) -> String? {
+  static func compress(job: Job, imageQuality: ImageQuality, imageFormat: ImageFormat, imageSize: ImageSize, imageSizeValue: Int) -> String? {
     let newSize: NSSize? = {
       if let imageRep = NSImageRep(contentsOf: job.inputFileURL), imageRep.pixelsWide > 0, imageRep.pixelsHigh > 0 {
-        return NSSize(
-          width: Double(imageRep.pixelsWide) * imageDimension.fraction,
-          height: Double(imageRep.pixelsHigh) * imageDimension.fraction
+        return getSize(
+          inputWidth: CGFloat(imageRep.pixelsWide),
+          inputHeight: CGFloat(imageRep.pixelsHigh),
+          imageSize: imageSize,
+          imageSizeValue: imageSizeValue
         )
       }
       return nil

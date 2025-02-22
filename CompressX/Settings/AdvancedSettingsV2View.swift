@@ -78,7 +78,7 @@ struct AdvancedSettingsV2View: View {
           Text("Video encoding codec")
           if #available(macOS 14, *) {
             Button(action: {
-              if let url = URL(string: "https://compressx.app/newsroom/h264-vs-h265") {
+              if let url = URL(string: "https://compresto.app/newsroom/h264-vs-h265") {
                 NSWorkspace.shared.open(url)
               }
             }, label: {
@@ -87,7 +87,7 @@ struct AdvancedSettingsV2View: View {
             .buttonBorderShape(.circle)
           } else {
             Button(action: {
-              if let url = URL(string: "https://compressx.app/newsroom/h264-vs-h265") {
+              if let url = URL(string: "https://compresto.app/newsroom/h264-vs-h265") {
                 NSWorkspace.shared.open(url)
               }
             }, label: {

@@ -63,17 +63,17 @@ struct ActivateLicenseView: View {
             .foregroundStyle(redColor)
         }
         if licenseManager.activateError.contains("activation limit") {
-          Link(destination: URL(string: "https://docs.compressx.app/guides/how-to-reset-your-license")!, label: {
+          Link(destination: URL(string: "https://docs.compresto.app/guides/how-to-reset-your-license")!, label: {
             Text("Reset your license limit")
           })
           .buttonStyle(NiceButtonStyle())
         }
         Spacer()
-        Link(destination: URL(string: "https://compressx.app/pricing")!, label: {
+        Link(destination: URL(string: "https://compresto.app/pricing")!, label: {
           Text("Purchase a license")
         })
         .buttonStyle(NiceButtonStyle())
-        Link(destination: URL(string: "https://docs.compressx.app/guides/how-to-find-your-license-key")!, label: {
+        Link(destination: URL(string: "https://docs.compresto.app/guides/how-to-find-your-license-key")!, label: {
           Text("How to find your license \(Image(systemName: "arrow.up.forward"))")
         })
       }

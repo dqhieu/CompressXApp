@@ -45,6 +45,7 @@
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>compressx</string>
+				<string>compresto</string>
 			</array>
 		</dict>
 	</array>

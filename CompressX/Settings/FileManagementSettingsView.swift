@@ -21,6 +21,23 @@ enum OnDropBehavior: String, CaseIterable {
   }
 }
 
+enum SubfolderProcessing: String, CaseIterable {
+  case none
+  case custom
+  case all
+
+  var displayText: String {
+    switch self {
+    case .none:
+      return "None"
+    case .custom:
+      return "Custom"
+    case .all:
+      return "All"
+    }
+  }
+}
+
 struct FileManagementSettingsView: View {
 
   @AppStorage("removeFileAfterCompress") var removeFileAfterCompress = false
@@ -29,10 +46,13 @@ struct FileManagementSettingsView: View {
   @AppStorage("outputFileNameFormat") var outputFileNameFormat = ""
   @AppStorage("onDropBehavior") var onDropBehavior: OnDropBehavior = .replace
   @AppStorage("thumbnailPreviewLimit") var thumbnailPreviewLimit = 20
+  @AppStorage("subfolderProcessing") var subfolderProcessing: SubfolderProcessing = .none
+  @AppStorage("subfolderProcessingLimit") var subfolderProcessingLimit = 1
 
   @State private var showOutputFileNameFormatPopover = false
   @State private var currentOutputFileNameFormat = ""
   @State private var thumbnailPreviewLimitText = "20"
+  @State private var subfolderProcessingLimitText = "1"
 
   var body: some View {
     Form {
@@ -52,17 +72,17 @@ struct FileManagementSettingsView: View {
       Toggle("Copy output files to clipboard", isOn: $copyCompressedFilesToClipboard)
         .toggleStyle(.switch)
       HStack {
-        Text("Do not generate preview thumbnail for more than")
+        Text("Thumbnail preview limit")
         Spacer()
         TextField("", text: $thumbnailPreviewLimitText)
           .frame(width: 50)
           .textFieldStyle(.squareBorder)
           .labelsHidden()
           .multilineTextAlignment(.trailing)
-          .onSubmit(onSubmittion)
+          .onSubmit(onThumbnailPreviewLimitSubmittion)
         Text(" files")
         Button {
-          onSubmittion()
+          onThumbnailPreviewLimitSubmittion()
         } label: {
           Text("Update")
         }
@@ -77,11 +97,43 @@ struct FileManagementSettingsView: View {
             Text(behavior.displayText).tag(behavior.rawValue)
           }
         } label: {
-          Text("On drop files into main window")
+          Text("On drop files and folders into main window")
         }
         Text("Hold Option key to always append files.")
           .font(.caption)
           .foregroundStyle(.secondary)
+      }
+      VStack(alignment: .leading, spacing: 4) {
+        Picker(selection: $subfolderProcessing) {
+          ForEach(SubfolderProcessing.allCases, id: \.self) { behavior in
+            Text(behavior.displayText).tag(behavior.rawValue)
+          }
+        } label: {
+          Text("Include files in subfolders recursively")
+        }
+        if subfolderProcessing == .custom {
+          HStack {
+            Text("Max depth")
+              .font(.caption)
+              .foregroundStyle(.secondary)
+            Spacer()
+            TextField("", text: $subfolderProcessingLimitText)
+              .frame(width: 50)
+              .textFieldStyle(.squareBorder)
+              .labelsHidden()
+              .multilineTextAlignment(.trailing)
+              .onSubmit(onMaxDepthSubmittion)
+            Button {
+              onMaxDepthSubmittion()
+            } label: {
+              Text("Update")
+            }
+            .disabled(Int(subfolderProcessingLimitText) == subfolderProcessingLimit)
+          }
+          .task {
+            subfolderProcessingLimitText = String(subfolderProcessingLimit)
+          }
+        }
       }
       VStack(alignment: .leading) {
         HStack {
@@ -132,9 +184,21 @@ struct FileManagementSettingsView: View {
     .scrollDisabled(true)
   }
 
-  func onSubmittion() {
+  func onThumbnailPreviewLimitSubmittion() {
     if let limit = Int(thumbnailPreviewLimitText), limit > 0 {
       thumbnailPreviewLimit = abs(limit)
+    } else {
+      let alert = NSAlert()
+      alert.messageText = "Invalid value"
+      alert.informativeText = "Value must be an positive integer"
+      alert.addButton(withTitle: "OK")
+      let _ = alert.runModal()
+    }
+  }
+
+  func onMaxDepthSubmittion() {
+    if let limit = Int(subfolderProcessingLimitText), limit > 0 {
+      subfolderProcessingLimit = abs(limit)
     } else {
       let alert = NSAlert()
       alert.messageText = "Invalid value"
