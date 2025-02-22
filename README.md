@@ -1,15 +1,15 @@
 <p align="center">
-    <a href="https://compressx.app"><img width="128" height="128" src="https://compressx.app/static/icon512.png" ></a>
-	<h1 align="center">CompressX</h1>
+    <a href="https://compresto.app"><img width="128" height="128" src="https://compresto.app/static/icon512.png" ></a>
+	<h1 align="center">Compresto</h1>
     <h4 align="center">Offline media compression tool for macOS</h4>
 </p>
 
 Compress video, image, and gif with up to 90% file size reduction without significant loss of quality
 
-See more at https://compressx.app
+See more at https://compresto.app
 
 <video width="640" height="360" controls>
-  <source src="https://compressx.app/static/demo.mp4" type="video/mp4">
+  <source src="https://compresto.app/static/demo.mp4" type="video/mp4">
 </video>
 
 # Features
@@ -26,4 +26,4 @@ See more at https://compressx.app
 
 # License
 
-The project is licensed under [GPLv3](https://github.com/dqhieu/CompressXApp/blob/main/LICENSE).
+The project is licensed under [GPLv3](https://github.com/dqhieu/ComprestoApp/blob/main/LICENSE).
